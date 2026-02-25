@@ -3,49 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>REPORTE DE VOTACIÓN</title>
+    <title>REPORTE - CONSULTA CIUDADANA</title>
     <style>
-        body { 
-            background: #0f0f0f; color: white; 
-            font-family: 'Segoe UI', sans-serif; padding: 40px; 
+        :root {
+            --accent: #d90429;
+            --bg: #050505;
+            --card-bg: rgba(255, 255, 255, 0.03);
         }
-        .container { max-width: 800px; margin: auto; }
-        h1 { text-align: center; color: #d90429; letter-spacing: 3px; }
-        table { 
-            width: 100%; border-collapse: collapse; margin-top: 30px; 
-            background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden;
+
+        body {
+            background: radial-gradient(circle at top, #2b0000 0%, #000000 100%);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
         }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #333; }
-        th { background: #d90429; color: white; text-transform: uppercase; font-size: 0.9rem; }
-        tr:hover { background: rgba(217, 4, 41, 0.1); }
-        .votos-count { font-weight: bold; color: #ff4d4d; font-size: 1.2rem; }
-        .btn-volver {
-            display: inline-block; margin-top: 20px; color: #888; text-decoration: none;
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            letter-spacing: 5px;
+            font-weight: 300;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(217, 4, 41, 0.4);
+        }
+
+        .line {
+            width: 60px;
+            height: 3px;
+            background: var(--accent);
+            margin: 0 auto;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        /* TABLA ESTILO NANCY */
+        .tabla-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        thead {
+            background: rgba(217, 4, 41, 0.1);
+        }
+
+        th {
+            padding: 20px;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            color: var(--accent);
+            border-bottom: 1px solid rgba(217, 4, 41, 0.3);
+        }
+
+        td {
+            padding: 18px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 1rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .ciudad-tag {
+            font-size: 0.7rem;
+            background: rgba(255,255,255,0.1);
+            padding: 3px 10px;
+            border-radius: 4px;
+            color: #ccc;
+        }
+
+        .votos-badge {
+            background: var(--accent);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(217, 4, 41, 0.4);
+            display: inline-block;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .footer-links {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .btn-inicio {
+            text-decoration: none;
+            color: #666;
+            font-size: 0.9rem;
+            transition: 0.3s;
+            letter-spacing: 1px;
+        }
+
+        .btn-inicio:hover {
+            color: var(--accent);
+        }
+
+        @media (max-width: 600px) {
+            td, th { padding: 12px; font-size: 0.8rem; }
+            .votos-badge { min-width: 30px; padding: 3px 10px; }
         }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h1>CONTEO DE VOTOS TIEMPO REAL</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>Ciudad</th>
-                    <th>Partido Político</th>
-                    <th>Total Votos</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for r in resultados %}
-                <tr>
-                    <td>{{ r.ciudad }}</td>
-                    <td>{{ r.nombre }}</td>
-                    <td class="votos-count">{{ r.total }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <a href="/" class="btn-volver">← Volver al inicio</a>
+        <header>
+            <h1>ESTADO DE VOTACIÓN</h1>
+            <div class="line"></div>
+        </header>
+
+        <div class="tabla-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ubicación</th>
+                        <th>Candidato / Partido</th>
+                        <th style="text-align: right;">Total Votos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in resultados %}
+                    <tr>
+                        <td><span class="ciudad-tag">{{ r.ciudad }}</span></td>
+                        <td>
+                            <div style="font-weight: bold;">{{ r.nombre }}</div>
+                        </td>
+                        <td style="text-align: right;">
+                            <span class="votos-badge">{{ r.total }}</span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" style="text-align: center; color: #555; padding: 40px;">
+                            No hay votos registrados todavía.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer-links">
+            <a href="/" class="btn-inicio">REGRESAR AL PANEL PRINCIPAL</a>
+        </div>
     </div>
+
 </body>
 </html>
