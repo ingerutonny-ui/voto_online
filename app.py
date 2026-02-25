@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -32,23 +32,60 @@ class Voto(db.Model):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
-
-# RUTA PARA RE-INSERTAR PARTIDOS RÁPIDAMENTE
-@app.route('/setup_db')
-def setup_db():
     db.create_all()
-    # Insertar un partido de prueba para Oruro
-    if not Partido.query.filter_by(nombre='LEAL').first():
-        p1 = Partido(nombre='LEAL', alcalde='ADEMAR WILLCARANI', ciudad='ORURO')
-        db.session.add(p1)
-        db.session.commit()
-    return "Base de datos lista y partido LEAL creado. Ve a /votar/ORURO"
+    return render_template('index.html')
 
 @app.route('/votar/<ciudad>')
 def votar(ciudad):
-    partidos = Partido.query.filter_by(ciudad=ciudad.upper()).all()
-    return render_template('votar.html', ciudad=ciudad.upper(), partidos=partidos)
+    ciudad_up = ciudad.upper()
+    restaurar_nombres_interna()
+    partidos = Partido.query.filter_by(ciudad=ciudad_up).all()
+    return render_template('votar.html', ciudad=ciudad_up, partidos=partidos)
+
+def restaurar_nombres_interna():
+    db.create_all()
+    data = [
+        # ORURO - LISTA COMPLETA SEGÚN PDF (15 CANDIDATOS ACTIVOS)
+        {'n': 'FRI', 'a': 'RENE ROBERTO MAMANI LLAVE', 'c': 'ORURO'}, #
+        {'n': 'LEAL', 'a': 'ADEMAR WILLCARANI MORALES', 'c': 'ORURO'}, #
+        {'n': 'NGP', 'a': 'IVÁN QUISPE GUTIÉRREZ', 'c': 'ORURO'}, #
+        {'n': 'AORA', 'a': 'SANTIAGO CONDORI APAZA', 'c': 'ORURO'}, #
+        {'n': 'UN', 'a': 'ENRIQUE FERNANDO URQUIDI DAZA', 'c': 'ORURO'}, #
+        {'n': 'AUPP', 'a': 'JUAN CARLOS CHOQUE ZUBIETA', 'c': 'ORURO'}, #
+        {'n': 'UCS', 'a': 'LINO MARCOS MAIN ADRIÁN', 'c': 'ORURO'}, #
+        {'n': 'SUMATE', 'a': 'OSCAR MIGUEL TOCO CHOQUE', 'c': 'ORURO'}, #
+        {'n': 'MTS', 'a': 'OLIVER OSCAR POMA CARTAGENA', 'c': 'ORURO'}, #
+        {'n': 'PATRIA ORURO', 'a': 'RAFAEL VARGAS VILLEGAS', 'c': 'ORURO'}, #
+        {'n': 'LIBRE', 'a': 'RENE BENJAMIN GUZMAN VARGAS', 'c': 'ORURO'}, #
+        {'n': 'PP', 'a': 'CARLOS AGUILAR', 'c': 'ORURO'}, #
+        {'n': 'SOMOS ORURO', 'a': 'MARCELO CORTEZ GUTIÉRREZ', 'c': 'ORURO'}, #
+        {'n': 'JACHA', 'a': 'MARCELO FERNANDO MEDINA CENTELLAS', 'c': 'ORURO'}, #
+        {'n': 'SOL.BO', 'a': 'MARCELO MEDINA', 'c': 'ORURO'}, #
+
+        # LA PAZ (17 CANDIDATOS)
+        {'n': 'JALLALLA', 'a': 'JHONNY PLATA', 'c': 'LA PAZ'},
+        {'n': 'ASP', 'a': 'XAVIER ITURRALDE', 'c': 'LA PAZ'},
+        {'n': 'VENCEREMOS', 'a': 'WALDO ALBARRACIN', 'c': 'LA PAZ'},
+        {'n': 'SOMOS LA PAZ', 'a': 'MIGUEL ROCA', 'c': 'LA PAZ'},
+        {'n': 'UPC', 'a': 'LUIS EDUARDO SILES', 'c': 'LA PAZ'},
+        {'n': 'LIBRE', 'a': 'CARLOS CORDERO', 'c': 'LA PAZ'},
+        {'n': 'MTS', 'a': 'FELIX PATZI', 'c': 'LA PAZ'},
+        {'n': 'PAN-BOL', 'a': 'AMILCAR BARRAL', 'c': 'LA PAZ'},
+        {'n': 'SOL.BO', 'a': 'ALVARO BLONDEL', 'c': 'LA PAZ'},
+        {'n': 'UNIDOS', 'a': 'PEDRO SUSZ', 'c': 'LA PAZ'},
+        {'n': 'UCS', 'a': 'PETER MALDONADO', 'c': 'LA PAZ'},
+        {'n': 'MAS-IPSP', 'a': 'CESAR DOCKWEILER', 'c': 'LA PAZ'},
+        {'n': 'PBCSP', 'a': 'IVAN ARIAS', 'c': 'LA PAZ'},
+        {'n': 'FPLP', 'a': 'FEDERICO ESCOBAR', 'c': 'LA PAZ'},
+        {'n': 'CC-A', 'a': 'RONALD MACLEAN', 'c': 'LA PAZ'},
+        {'n': 'MNR', 'a': 'JOSE MANUEL ENCINAS', 'c': 'LA PAZ'},
+        {'n': 'APG', 'a': 'GUSTAVO BEJARANO', 'c': 'LA PAZ'}
+    ]
+    for p in data:
+        partido_existente = Partido.query.filter_by(nombre=p['n'], ciudad=p['c']).first()
+        if not partido_existente:
+            db.session.add(Partido(nombre=p['n'], alcalde=p['a'], ciudad=p['c']))
+    db.session.commit()
 
 @app.route('/confirmar_voto', methods=['POST'])
 def confirmar_voto():
@@ -57,7 +94,7 @@ def confirmar_voto():
         if Voto.query.filter_by(ci=ci_f).first():
             return render_template('index.html', msg_type="error", ci_votante=ci_f)
 
-        nuevo = Voto(
+        nuevo_voto = Voto(
             ci=ci_f,
             nombres=request.form.get('nombres', '').strip().upper(),
             apellido=request.form.get('apellido', '').strip().upper(),
@@ -66,12 +103,12 @@ def confirmar_voto():
             edad=int(request.form.get('edad')),
             partido_id=int(request.form.get('partido_id'))
         )
-        db.session.add(nuevo)
+        db.session.add(nuevo_voto)
         db.session.commit()
         return render_template('index.html', msg_type="success", ci_votante=ci_f)
-    except Exception as e:
+    except Exception:
         db.session.rollback()
-        return render_template('index.html', msg_type="error", ci_votante="ERROR")
+        return render_template('index.html', msg_type="error", ci_votante="ERROR_SISTEMA")
 
 if __name__ == '__main__':
     with app.app_context():
