@@ -3,233 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAPELETA DIGITAL - {{ ciudad }}</title>
+    <title>CONSULTA - {{ ciudad }}</title>
     <style>
-        :root {
-            --rojo-bolivia: #d90429;
-            --dorado-borde: #b8926a;
-            --fondo-papel: #f4f1ea;
-        }
-
         body { 
-            background: #2b2b2b; 
-            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; 
-            display: flex; 
-            justify-content: center; 
+            background: radial-gradient(circle, #8b0000 0%, #000000 100%); 
+            font-family: 'Segoe UI', sans-serif; 
             margin: 0; 
             padding: 20px;
-        }
-
-        .contenedor-papeleta {
-            background: var(--fondo-papel);
-            width: 100%;
-            max-width: 1280px;
-            padding: 30px;
-            border: 15px double var(--dorado-borde);
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
-            position: relative;
-        }
-
-        header {
-            text-align: center;
-            border-bottom: 4px solid #333;
-            margin-bottom: 30px;
-            padding-bottom: 10px;
-        }
-
-        header h1 { 
-            margin: 0; 
-            font-size: 2.5rem; 
-            letter-spacing: 5px; 
-            color: #1a1a1a;
-        }
-
-        .ciudad-badge {
-            background: #1a1a1a;
-            color: #fff;
-            padding: 8px 40px;
-            display: inline-block;
-            font-weight: bold;
-            margin-top: 10px;
-            border-radius: 50px;
-            text-transform: uppercase;
-        }
-
-        .grid-papeleta {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 20px;
-        }
-
-        .tarjeta-voto {
-            background: #fff;
-            border: 2px solid #333;
-            height: 420px;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
+            align-items: center;
+        }
+
+        header { text-align: center; margin-bottom: 30px; }
+        h1 { color: white; letter-spacing: 4px; text-shadow: 2px 2px 10px rgba(0,0,0,0.5); margin: 0; }
+        .badge { background: #d90429; color: white; padding: 5px 25px; border-radius: 20px; font-weight: bold; display: inline-block; margin-top: 10px; box-shadow: 0 0 15px rgba(217, 4, 41, 0.5); }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 25px;
+            max-width: 1300px;
+            width: 100%;
+        }
+
+        /* BOTONES FLOTANTES */
+        .tarjeta {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            height: 400px;
             position: relative;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.4s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* EFECTO SELECCIONADO */
-        .tarjeta-voto:hover, .tarjeta-voto.selected {
-            border-color: var(--rojo-bolivia);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(217, 4, 41, 0.4);
+        .tarjeta:hover {
+            transform: translateY(-10px) scale(1.02);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 20px rgba(217, 4, 41, 0.3);
+            border: 1px solid rgba(217, 4, 41, 0.5);
         }
 
-        .area-imagen {
+        .img-area {
             flex-grow: 1;
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
-            margin: 10px;
-            transition: transform 0.3s;
+            margin: 15px;
         }
 
-        .tarjeta-voto:hover .area-imagen {
-            transform: scale(1.05);
-        }
-
-        .info-candidato {
-            background: #f8f9fa;
-            border-top: 1px solid #ddd;
-            padding: 15px 5px;
-            text-align: center;
-            min-height: 90px;
-        }
-
-        .partido-nombre {
-            color: var(--rojo-bolivia);
-            font-weight: 900;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-
-        .alcalde-nombre {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #333;
-            line-height: 1.2;
-        }
-
-        /* BOTÓN VOTAR MODERNO */
-        .btn-confirmar {
+        /* BOTÓN VOTAR CON EFECTO GLOW */
+        .votar-overlay {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0);
-            background: var(--rojo-bolivia);
+            background: #d90429;
             color: white;
-            border: none;
-            padding: 15px 30px;
-            font-weight: bold;
+            padding: 15px 35px;
             border-radius: 50px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            transition: all 0.3s;
-            z-index: 10;
-            font-size: 1.2rem;
+            font-weight: 900;
+            font-size: 1.3rem;
+            box-shadow: 0 0 30px #d90429;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 5;
         }
 
-        .tarjeta-voto:hover .btn-confirmar {
+        .tarjeta:hover .votar-overlay {
             transform: translate(-50%, -50%) scale(1);
         }
 
-        .marca-x {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            width: 30px;
-            height: 30px;
-            border: 2px solid #ccc;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: transparent;
+        .info {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            text-align: center;
+            color: white;
         }
 
-        .tarjeta-voto:hover .marca-x {
-            border-color: var(--rojo-bolivia);
-            color: var(--rojo-bolivia);
-        }
+        .p-nom { font-weight: bold; font-size: 1.1rem; color: #ff4d4d; margin-bottom: 5px; }
+        .a-nom { font-size: 0.85rem; opacity: 0.8; }
 
-        /* RESPONSIVE TABLET */
-        @media (max-width: 1024px) { .grid-papeleta { grid-template-columns: repeat(3, 1fr); } }
-        @media (max-width: 600px) { .grid-papeleta { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 1100px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 700px) { .grid { grid-template-columns: repeat(2, 1fr); } }
     </style>
 </head>
 <body>
 
-<div class="contenedor-papeleta">
-    <header>
-        <h1>ELECCIONES MUNICIPALES 2026</h1>
-        <div class="ciudad-badge">{{ ciudad }}</div>
-    </header>
+<header>
+    <h1>PAPELETA ELECTORAL</h1>
+    <div class="badge">{{ ciudad }}</div>
+</header>
 
-    <div class="grid-papeleta">
-        {% for p in partidos %}
-            {% set img = 'accion.png' %}
-            
-            {% if ciudad == 'ORURO' %}
-                {% if p.nombre == 'FRI' %}{% set img = 'OR-FRI.png' %}
-                {% elif p.nombre == 'LEAL' %}{% set img = 'OR-LEAL.png' %}
-                {% elif p.nombre == 'NGP' %}{% set img = 'OR-NGP.png' %}
-                {% elif p.nombre == 'AORA' %}{% set img = 'OR-AORA.png' %}
-                {% elif p.nombre == 'UN' %}{% set img = 'OR-UN.png' %}
-                {% elif p.nombre == 'AUPP' %}{% set img = 'OR-AUPP.png' %}
-                {% elif p.nombre == 'UCS' %}{% set img = 'OR-UCS.png' %}
-                {% elif p.nombre == 'BST' %}{% set img = 'OR-BST.png' %}
-                {% elif p.nombre == 'SUMATE' %}{% set img = 'OR-SUMATE.png' %}
-                {% elif p.nombre == 'MTS' %}{% set img = 'OR-MTS.png' %}
-                {% elif p.nombre == 'PATRIA' %}{% set img = 'OR-PATRIA.png' %}
-                {% elif p.nombre == 'LIBRE' %}{% set img = 'OR-LIBRE.png' %}
-                {% elif p.nombre == 'PP' %}{% set img = 'OR-PP.png' %}
-                {% elif p.nombre == 'SOMOS ORURO' %}{% set img = 'OR-SOMOS.png' %}
-                {% elif p.nombre == 'JACHA' %}{% set img = 'OR-JACHA.png' %}
-                {% endif %}
-            {% elif ciudad == 'LA PAZ' %}
-                {% if p.nombre == 'Jallalla' %}{% set img = 'LP-JALLALLA.png' %}
-                {% elif p.nombre == 'ASP' %}{% set img = 'LP-ASP.png' %}
-                {% elif p.nombre == 'Venceremos' %}{% set img = 'LP-VENCEREMOS.png' %}
-                {% elif p.nombre == 'Somos La Paz' %}{% set img = 'LP-SOMOSLP.png' %}
-                {% elif p.nombre == 'UPC' %}{% set img = 'LP-UPC.png' %}
-                {% elif p.nombre == 'Libre' %}{% set img = 'LP-LIBRE.png' %}
-                {% elif p.nombre == 'A-UPP' %}{% set img = 'LP-AUPP.png' %}
-                {% elif p.nombre == 'Innovación Humana' %}{% set img = 'LP-IH.png' %}
-                {% elif p.nombre == 'VIDA' %}{% set img = 'LP-VIDA.png' %}
-                {% elif p.nombre == 'FRI' %}{% set img = 'LP-FRI.png' %}
-                {% elif p.nombre == 'PDC' %}{% set img = 'LP-PDC.png' %}
-                {% elif p.nombre == 'MTS' %}{% set img = 'LP-MTS.png' %}
-                {% elif p.nombre == 'NGP' %}{% set img = 'LP-NGP.png' %}
-                {% elif p.nombre == 'MPS' %}{% set img = 'LP-MPS.png' %}
-                {% elif p.nombre == 'APB-Súmate' %}{% set img = 'LP-SUMATE.png' %}
-                {% elif p.nombre == 'Alianza Patria' %}{% set img = 'LP-PATRIA.png' %}
-                {% elif p.nombre == 'Suma por el Bien Común' %}{% set img = 'LP-SUMA.png' %}
-                {% endif %}
+<div class="grid">
+    {% for p in partidos %}
+        {% set img = 'accion.png' %}
+        
+        {# MAPEO DE 32 CANDIDATOS #}
+        {% if ciudad == 'ORURO' %}
+            {% if p.nombre == 'FRI' %}{% set img = 'OR-FRI.png' %}
+            {% elif p.nombre == 'LEAL' %}{% set img = 'OR-LEAL.png' %}
+            {% elif p.nombre == 'NGP' %}{% set img = 'OR-NGP.png' %}
+            {% elif p.nombre == 'AORA' %}{% set img = 'OR-AORA.png' %}
+            {% elif p.nombre == 'UN' %}{% set img = 'OR-UN.png' %}
+            {% elif p.nombre == 'AUPP' %}{% set img = 'OR-AUPP.png' %}
+            {% elif p.nombre == 'UCS' %}{% set img = 'OR-UCS.png' %}
+            {% elif p.nombre == 'BST' %}{% set img = 'OR-BST.png' %}
+            {% elif p.nombre == 'SUMATE' %}{% set img = 'OR-SUMATE.png' %}
+            {% elif p.nombre == 'MTS' %}{% set img = 'OR-MTS.png' %}
+            {% elif p.nombre == 'PATRIA' %}{% set img = 'OR-PATRIA.png' %}
+            {% elif p.nombre == 'LIBRE' %}{% set img = 'OR-LIBRE.png' %}
+            {% elif p.nombre == 'PP' %}{% set img = 'OR-PP.png' %}
+            {% elif p.nombre == 'SOMOS ORURO' %}{% set img = 'OR-SOMOS.png' %}
+            {% elif p.nombre == 'JACHA' %}{% set img = 'OR-JACHA.png' %}
             {% endif %}
+        {% elif ciudad == 'LA PAZ' %}
+            {% if p.nombre == 'Jallalla' %}{% set img = 'LP-JALLALLA.png' %}
+            {% elif p.nombre == 'ASP' %}{% set img = 'LP-ASP.png' %}
+            {% elif p.nombre == 'Venceremos' %}{% set img = 'LP-VENCEREMOS.png' %}
+            {% elif p.nombre == 'Somos La Paz' %}{% set img = 'LP-SOMOSLP.png' %}
+            {% elif p.nombre == 'UPC' %}{% set img = 'LP-UPC.png' %}
+            {% elif p.nombre == 'Libre' %}{% set img = 'LP-LIBRE.png' %}
+            {% elif p.nombre == 'A-UPP' %}{% set img = 'LP-AUPP.png' %}
+            {% elif p.nombre == 'Innovación Humana' %}{% set img = 'LP-IH.png' %}
+            {% elif p.nombre == 'VIDA' %}{% set img = 'LP-VIDA.png' %}
+            {% elif p.nombre == 'FRI' %}{% set img = 'LP-FRI.png' %}
+            {% elif p.nombre == 'PDC' %}{% set img = 'LP-PDC.png' %}
+            {% elif p.nombre == 'MTS' %}{% set img = 'LP-MTS.png' %}
+            {% elif p.nombre == 'NGP' %}{% set img = 'LP-NGP.png' %}
+            {% elif p.nombre == 'MPS' %}{% set img = 'LP-MPS.png' %}
+            {% elif p.nombre == 'APB-Súmate' %}{% set img = 'LP-SUMATE.png' %}
+            {% elif p.nombre == 'Alianza Patria' %}{% set img = 'LP-PATRIA.png' %}
+            {% elif p.nombre == 'Suma por el Bien Común' %}{% set img = 'LP-SUMA.png' %}
+            {% endif %}
+        {% endif %}
 
-            <div class="tarjeta-voto" onclick="this.querySelector('form').submit();">
-                <div class="marca-x">X</div>
-                
-                <div class="area-imagen" style="background-image: url('/static/{{ img }}');"></div>
-                
-                <form action="/confirmar_voto" method="POST">
-                    <input type="hidden" name="partido_id" value="{{ p.id }}">
-                    <button type="submit" class="btn-confirmar">VOTAR</button>
-                </form>
-
-                <div class="info-candidato">
-                    <div class="partido-nombre">{{ p.nombre }}</div>
-                    <div class="alcalde-nombre">{{ p.alcalde }}</div>
-                </div>
+        <div class="tarjeta" onclick="this.querySelector('form').submit();">
+            <div class="votar-overlay">VOTAR</div>
+            <div class="img-area" style="background-image: url('/static/{{ img }}');"></div>
+            <form action="/confirmar_voto" method="POST">
+                <input type="hidden" name="partido_id" value="{{ p.id }}">
+            </form>
+            <div class="info">
+                <div class="p-nom">{{ p.nombre }}</div>
+                <div class="a-nom">{{ p.alcalde }}</div>
             </div>
-        {% endfor %}
-    </div>
+        </div>
+    {% endfor %}
 </div>
 
 </body>
