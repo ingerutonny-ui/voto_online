@@ -14,12 +14,8 @@ if uri and uri.startswith("postgres://"):
 app.config['SQLALCHEMY_DATABASE_URI'] = uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# FLEXIBILIDAD PARA DISPOSITIVOS ANTIGUOS
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    "connect_args": {
-        "sslmode": "prefer"
-    }
-}
+# Compatibilidad con motores de DB y dispositivos antiguos
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {"connect_args": {"sslmode": "prefer"}}
 
 db = SQLAlchemy(app)
 
@@ -39,45 +35,70 @@ class Partido(db.Model):
     votos_alcalde = db.Column(db.Integer, default=0)
     votos_concejal = db.Column(db.Integer, default=0)
 
-# --- RUTAS ---
+# --- INICIALIZACIÓN DE DATOS REALES ---
 @app.route('/')
 def index():
     try:
-        # Se mantiene la carga de datos que ya aprobaste
+        db.drop_all()
         db.create_all()
-        return render_template('index.html', mensaje="SISTEMA ACTIVO")
+        
+        # Datos Oruro (de tu PDF)
+        oruro_data = [
+            {"p": "FRI", "a": "Rene Roberto Mamani Llave"}, {"p": "LEAL", "a": "Adhemar Willcarani Morales"},
+            {"p": "NGP", "a": "Iván Quispe Gutiérrez"}, {"p": "AORA", "a": "Santiago Condori Apaza"},
+            {"p": "UN", "a": "Enrique Fernando Urquidi Daza"}, {"p": "AUPP", "a": "Juan Carlos Choque Zubieta"},
+            {"p": "UCS", "a": "Lino Marcos Main Adrián"}, {"p": "BST", "a": "Edgar Rafael Bazán Ortega"},
+            {"p": "SUMATE", "a": "Oscar Miguel Toco Choque"}, {"p": "MTS", "a": "Oliver Oscar Poma Cartagena"},
+            {"p": "PATRIA", "a": "Rafael Vargas Villegas"}, {"p": "LIBRE", "a": "Rene Benjamin Guzman Vargas"},
+            {"p": "PP", "a": "Carlos Aguilar"}, {"p": "SOMOS ORURO", "a": "Marcelo Cortez Gutiérrez"},
+            {"p": "JACHA", "a": "Marcelo Fernando Medina Centellas"}
+        ]
+        # Datos La Paz (de tu lista)
+        lapaz_data = [
+            {"p": "Jallalla", "a": "Jhonny Plata"}, {"p": "ASP", "a": "Xavier Iturralde"},
+            {"p": "Venceremos", "a": "Waldo Albarracín"}, {"p": "Somos La Paz", "a": "Miguel Roca"},
+            {"p": "UPC", "a": "Luis Eduardo 'Chichi' Siles"}, {"p": "Libre", "a": "Carlos 'Cae' Palenque"},
+            {"p": "A-UPP", "a": "Isaac Fernández"}, {"p": "Innovación Humana", "a": "César Dockweiler"},
+            {"p": "VIDA", "a": "Fernando Valencia"}, {"p": "FRI", "a": "Raúl Daza"},
+            {"p": "PDC", "a": "Mario Silva"}, {"p": "MTS", "a": "Jorge Dulon"},
+            {"p": "NGP", "a": "Hernán Rodrigo Rivera"}, {"p": "MPS", "a": "Ricardo Cuevas"},
+            {"p": "APB-Súmate", "a": "Óscar Sogliano"}, {"p": "Alianza Patria", "a": "Carlos Nemo Rivera"},
+            {"p": "Suma por el Bien Común", "a": "Iván Arias"}
+        ]
+
+        p_objs = []
+        for i, c in enumerate(oruro_data, 1):
+            p_objs.append(Partido(nombre=c["p"], alcalde=c["a"], concejal=f"Concejal {i}", ciudad="ORURO"))
+        for i, c in enumerate(lapaz_data, 1):
+            p_objs.append(Partido(nombre=c["p"], alcalde=c["a"], concejal=f"Concejal {i}", ciudad="LA PAZ"))
+        
+        db.session.bulk_save_objects(p_objs)
+        db.session.commit()
+        return render_template('index.html', mensaje="SISTEMA REINICIADO - DATOS CARGADOS")
     except Exception as e:
         return f"Error: {str(e)}"
 
 @app.route('/votar/<ciudad>')
 def votar(ciudad):
     partidos = Partido.query.filter_by(ciudad=ciudad).order_by(Partido.id).all()
-    # Pasamos el nombre de la ciudad en corto para los archivos (OR, LP)
     prefijo = "OR" if ciudad == "ORURO" else "LP"
     return render_template('votar.html', ciudad=ciudad, partidos=partidos, prefijo=prefijo)
 
 @app.route('/confirmar_voto', methods=['POST'])
 def confirmar_voto():
-    partido_id = request.form.get('partido_id')
-    ciudad = request.form.get('ciudad')
-    partido = Partido.query.get(partido_id)
-    return render_template('confirmar.html', partido=partido, ciudad=ciudad)
+    p = Partido.query.get(request.form.get('partido_id'))
+    return render_template('confirmar.html', partido=p, ciudad=request.form.get('ciudad'))
 
 @app.route('/registrar_voto', methods=['POST'])
 def registrar_voto():
     ci = request.form.get('ci')
-    partido_id = request.form.get('partido_id')
-    votante = Votante.query.get(ci)
-    if votante and votante.ya_voto:
-        return render_template('error.html', mensaje="Usted ya emitió su voto.")
-    if not votante:
-        votante = Votante(ci=ci, ya_voto=True)
-        db.session.add(votante)
-    else:
-        votante.ya_voto = True
-    partido = Partido.query.get(partido_id)
-    partido.votos_alcalde += 1
-    partido.votos_concejal += 1
+    p_id = request.form.get('partido_id')
+    v = Votante.query.get(ci)
+    if v and v.ya_voto: return render_template('error.html', mensaje="Ya votó.")
+    if not v: v = Votante(ci=ci, ya_voto=True); db.session.add(v)
+    else: v.ya_voto = True
+    p = Partido.query.get(p_id)
+    p.votos_alcalde += 1; p.votos_concejal += 1
     db.session.commit()
     return render_template('exito.html')
 
