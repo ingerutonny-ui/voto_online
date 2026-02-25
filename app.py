@@ -1,12 +1,11 @@
 import os
 from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text
 
 app = Flask(__name__)
 app.secret_key = 'consulta_ciudadana_2026'
 
-# Configuración de base de datos optimizada
+# Configuración de base de datos optimizada para Render
 uri = os.environ.get('DATABASE_URL')
 if uri and uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql://", 1)
@@ -21,13 +20,14 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 
 db = SQLAlchemy(app)
 
+# MODELO DE DATOS
 class Partido(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100))
     alcalde = db.Column(db.String(100))
     ciudad = db.Column(db.String(50))
 
-# Inicialización segura
+# INICIALIZACIÓN DE DATOS
 def init_db():
     with app.app_context():
         db.create_all()
@@ -54,6 +54,7 @@ def init_db():
                 db.session.add(Partido(nombre=d[0], alcalde=d[1], ciudad=d[2]))
             db.session.commit()
 
+# RUTAS
 @app.route('/')
 def index():
     return render_template('index.html', mensaje="SISTEMA LISTO")
@@ -66,10 +67,16 @@ def votar(ciudad):
 @app.route('/confirmar_voto', methods=['POST'])
 def confirmar_voto():
     p_id = request.form.get('partido_id')
+    apellido = request.form.get('apellido')
+    ci = request.form.get('ci')
+    
     partido = Partido.query.get(p_id)
-    return f"VOTO REGISTRADO: {partido.nombre}"
+    
+    # Respuesta visual tras el registro exitoso
+    mensaje_exito = f"VOTO REGISTRADO: {partido.nombre} PARA EL CI {ci} ({apellido})"
+    return render_template('index.html', mensaje=mensaje_exito)
 
-# El arranque del servidor llama a la inicialización antes de empezar a escuchar
+# Ejecutar inicialización
 init_db()
 
 if __name__ == '__main__':
