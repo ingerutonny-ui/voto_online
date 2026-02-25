@@ -6,7 +6,7 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = 'consulta_ciudadana_secret'
 
-# --- CONFIGURACIÓN DE BASE DE DATOS ---
+# --- CONFIGURACIÓN DE BASE DE DATOS Y SEGURIDAD ---
 uri = os.environ.get('DATABASE_URL')
 if uri and uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql://", 1)
@@ -14,7 +14,7 @@ if uri and uri.startswith("postgres://"):
 app.config['SQLALCHEMY_DATABASE_URI'] = uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# CORRECCIÓN PARA TABLETA: Cambiamos 'require' por 'prefer' para permitir navegadores antiguos
+# Ajuste para compatibilidad con dispositivos antiguos (Tabletas)
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     "connect_args": {
         "sslmode": "prefer"
@@ -43,28 +43,32 @@ class Partido(db.Model):
 @app.route('/')
 def index():
     try:
+        # FORZAMOS REINICIO PARA CARGAR LOS 15 PARTIDOS NUEVOS
+        db.drop_all() 
         db.create_all()
-        if not Partido.query.first():
-            partidos_lista = []
-            ciudades = ["ORURO", "LA PAZ"]
-            for ciudad in ciudades:
-                for i in range(1, 16):
-                    partidos_lista.append(Partido(
-                        nombre=f"PARTIDO {i}", 
-                        alcalde=f"Candidato {i}", 
-                        concejal=f"Concejal {i}", 
-                        ciudad=ciudad
-                    ))
-            db.session.bulk_save_objects(partidos_lista)
-            db.session.commit()
         
-        return render_template('index.html', mensaje="SISTEMA INICIALIZADO - ELIJA SU CIUDAD")
+        partidos_lista = []
+        ciudades = ["ORURO", "LA PAZ"]
+        
+        for ciudad in ciudades:
+            for i in range(1, 16):
+                partidos_lista.append(Partido(
+                    nombre=f"PARTIDO {i}", 
+                    alcalde=f"Candidato Alcalde {i}", 
+                    concejal=f"Candidato Concejal {i}", 
+                    ciudad=ciudad
+                ))
+        
+        db.session.bulk_save_objects(partidos_lista)
+        db.session.commit()
+        
+        return render_template('index.html', mensaje="SISTEMA REINICIADO - 15 PARTIDOS LISTOS")
     except Exception as e:
         return f"Error: {str(e)}"
 
 @app.route('/votar/<ciudad>')
 def votar(ciudad):
-    partidos = Partido.query.filter_by(ciudad=ciudad).all()
+    partidos = Partido.query.filter_by(ciudad=ciudad).order_by(Partido.id).all()
     return render_template('votar.html', ciudad=ciudad, partidos=partidos)
 
 @app.route('/confirmar_voto', methods=['POST'])
@@ -97,6 +101,5 @@ def registrar_voto():
     return render_template('exito.html')
 
 if __name__ == '__main__':
-    # Configuración de puerto dinámica para Render
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
