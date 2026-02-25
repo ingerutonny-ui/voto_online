@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOTO REGISTRADO</title>
+    <style>
+        :root { --success-color: #00ff88; --bg-dark: #000; }
+        body {
+            background-color: var(--bg-dark); color: white;
+            font-family: 'Segoe UI', sans-serif; height: 100vh;
+            display: flex; justify-content: center; align-items: center; margin: 0;
+            overflow: hidden;
+        }
+        .container {
+            text-align: center; border: 1px solid var(--success-color);
+            padding: 50px; border-radius: 30px; background: rgba(0, 255, 136, 0.05);
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.1);
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .icon { font-size: 80px; margin-bottom: 20px; color: var(--success-color); }
+        h1 { letter-spacing: 5px; text-transform: uppercase; margin-bottom: 15px; }
+        p { color: #aaa; letter-spacing: 2px; margin-bottom: 30px; }
+        .btn-home {
+            padding: 15px 40px; border-radius: 50px; background: var(--success-color);
+            color: black; text-decoration: none; font-weight: bold;
+            text-transform: uppercase; letter-spacing: 2px; transition: 0.3s;
+        }
+        .btn-home:hover { box-shadow: 0 0 25px var(--success-color); transform: translateY(-3px); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">✓</div>
+        <h1>¡VOTO EXITOSO!</h1>
+        <p>Tu participación ha sido registrada correctamente.</p>
+        <a href="/" class="btn-home">FINALIZAR</a>
+    </div>
+</body>
+</html>
