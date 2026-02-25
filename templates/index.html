@@ -5,49 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CONSULTA CIUDADANA MUNICIPAL</title>
     <style>
-        :root { --accent: #d90429; }
-        body, html { margin:0; padding:0; width:100%; height:100%; font-family: 'Segoe UI', sans-serif; background:#f4f7f6; overflow: hidden; }
+        :root { --accent: #d90429; --nancy-dark: #1a1a1a; }
+        body, html { margin:0; padding:0; width:100%; height:100%; font-family: 'Segoe UI', sans-serif; background:#f4f7f6; overflow-x: hidden; }
 
-        /* SPLASH SCREEN IMPONENTE */
+        /* SPLASH SCREEN */
         #splash {
             position: fixed; top:0; left:0; width:100%; height:100%;
             background: white; display: flex; flex-direction: column;
             align-items: center; justify-content: center; z-index: 10000;
         }
-        .splash-logo { width: 280px; height: auto; margin-bottom: 40px; animation: pulse 2s infinite ease-in-out; }
-        .loader-container { width: 300px; height: 10px; background: #f0f0f0; border-radius: 20px; overflow: hidden; }
+        .splash-logo { width: 80%; max-width: 400px; height: auto; margin-bottom: 40px; animation: pulse 2s infinite ease-in-out; }
+        .loader-container { width: 250px; height: 6px; background: #f0f0f0; border-radius: 20px; overflow: hidden; }
         .loader-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.1s linear; }
-        .loader-text { margin-top: 20px; font-weight: 900; color: #333; font-size: 1.5rem; letter-spacing: 2px; }
+        .loader-text { margin-top: 15px; font-weight: 900; color: #333; font-size: 1.2rem; }
 
-        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
 
-        /* CONTENIDO */
-        .wrapper { display:flex; align-items:center; justify-content:center; height:100vh; transition: 0.6s; opacity: 0; }
+        /* CONTENIDO RESPONSIVO */
+        .wrapper { display:flex; align-items:center; justify-content:center; min-height:100vh; padding: 20px; box-sizing: border-box; transition: 0.6s; opacity: 0; }
         .show-content { opacity: 1; }
         .blur-active { filter: blur(15px); pointer-events: none; }
 
-        .hero-card { background:white; padding:60px; border-radius:50px; box-shadow:0 40px 100px rgba(0,0,0,0.1); text-align:center; width:90%; max-width:850px; }
-        h1 { font-size:2.8rem; letter-spacing:3px; margin:0; color:#111; font-weight:900; text-transform: uppercase; }
-        .line { width:120px; height:8px; background:var(--accent); margin:25px auto 50px; border-radius:10px; }
+        .hero-card { background:white; padding:40px 20px; border-radius:40px; box-shadow:0 30px 60px rgba(0,0,0,0.05); text-align:center; width:100%; max-width:800px; }
+        h1 { font-size: 2rem; letter-spacing:2px; margin:0; color:var(--nancy-dark); font-weight:900; text-transform: uppercase; }
+        .line { width:80px; height:6px; background:var(--accent); margin:20px auto 40px; border-radius:10px; }
 
-        .btn-container { display:flex; gap:40px; justify-content:center; }
-        .btn-city { flex:1; background:#fdffdf; border:2px solid #eee; padding:50px 20px; border-radius:40px; text-decoration:none; transition:0.4s; display:flex; flex-direction:column; align-items:center; }
-        .btn-city:hover { transform:translateY(-15px); border-color:var(--accent); background:white; }
-        .btn-city img { width:80%; height:220px; object-fit:contain; margin-bottom:25px; }
-        .btn-city span { font-weight:900; color:#222; font-size:2rem; letter-spacing:2px; }
+        .btn-container { display:flex; gap:20px; justify-content:center; flex-wrap: wrap; }
+        .btn-city { flex: 1; min-width: 280px; background:#fdffdf; border:2px solid #eee; padding:40px 20px; border-radius:35px; text-decoration:none; transition:0.3s; display:flex; flex-direction:column; align-items:center; }
+        .btn-city:hover { transform:translateY(-10px); border-color:var(--accent); background:white; }
+        .btn-city img { width:100%; height:180px; object-fit:contain; margin-bottom:20px; }
+        .btn-city span { font-weight:900; color:var(--nancy-dark); font-size:1.8rem; letter-spacing:1px; }
 
-        /* OVERLAY ELEGANTE */
-        .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); display: none; align-items:center; justify-content:center; z-index: 9999; }
-        .msg-content { background: white; padding: 60px; border-radius: 50px; box-shadow: 0 50px 120px rgba(0,0,0,0.2); text-align: center; width: 85%; max-width: 600px; border: 1px solid #eee; }
-        .msg-content h2 { font-size: 3rem; font-weight: 900; margin-bottom: 20px; }
-        .ci-box { background: #f8f9fa; padding: 25px; border-radius: 25px; font-weight: bold; font-size: 2.5rem; color: var(--accent); margin: 30px 0; border: 3px dashed #ddd; }
-        .btn-volver { display: inline-block; padding: 20px 60px; background: #111; color: white; text-decoration: none; border-radius: 25px; font-weight: 900; font-size: 1.2rem; }
+        /* OVERLAY MENSAJES */
+        .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); display: none; align-items:center; justify-content:center; z-index: 9999; padding: 20px; }
+        .msg-content { background: white; padding: 40px; border-radius: 40px; box-shadow: 0 40px 100px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 500px; }
+        .ci-box { background: #f8f9fa; padding: 20px; border-radius: 20px; font-weight: bold; font-size: 2rem; color: var(--accent); margin: 20px 0; border: 2px dashed #ddd; }
+        .btn-volver { display: inline-block; padding: 15px 50px; background: var(--nancy-dark); color: white; text-decoration: none; border-radius: 20px; font-weight: 900; }
 
-        @media (max-width: 600px) { .btn-container { flex-direction:column; } .btn-city img { height: 180px; } }
+        @media (max-width: 600px) {
+            h1 { font-size: 1.6rem; }
+            .btn-city { padding: 30px 15px; }
+            .btn-city img { height: 140px; }
+        }
     </style>
 </head>
 <body>
-
     <div id="splash">
         <img src="/static/accion.png" class="splash-logo">
         <div class="loader-container"><div class="loader-bar" id="bar"></div></div>
@@ -56,7 +58,7 @@
 
     <div class="wrapper" id="page-wrapper">
         <div class="hero-card">
-            <h1>CONSULTA CIUDADANA<br><span style="color:#777; font-size: 1.8rem;">MUNICIPAL</span></h1>
+            <h1>CONSULTA CIUDADANA<br><span style="color:#777; font-size: 1.3rem;">MUNICIPAL</span></h1>
             <div class="line"></div>
             <div class="btn-container">
                 <a href="/votar/ORURO" class="btn-city"><img src="/static/oruro.png"><span>ORURO</span></a>
@@ -68,16 +70,12 @@
     {% if msg_type %}
     <div class="overlay" id="msg-overlay" style="display: flex;">
         <div class="msg-content">
-            {% if msg_type == 'success' %}
-                <h2 style="color: #2b9348;">GRACIAS POR VOTAR</h2>
-                <p style="font-size:1.3rem;">SU VOTO FUE REGISTRADO PARA EL C.I.:</p>
-                <div class="ci-box">{{ ci_votante }}</div>
-            {% else %}
-                <h2 style="color: var(--accent);">ERROR: YA VOTÓ</h2>
-                <p style="font-size:1.3rem;">EL SISTEMA RECHAZÓ EL C.I. DUPLICADO:</p>
-                <div class="ci-box">{{ ci_votante }}</div>
-            {% endif %}
-            <a href="/" class="btn-volver">CERRAR</a>
+            <h2 style="font-weight: 900; color: {{ '#2b9348' if msg_type == 'success' else '#d90429' }};">
+                {{ '¡VOTO REGISTRADO!' if msg_type == 'success' else 'ERROR: YA VOTÓ' }}
+            </h2>
+            <p>DOCUMENTO DE IDENTIDAD:</p>
+            <div class="ci-box">{{ ci_votante }}</div>
+            <a href="/" class="btn-volver">ENTENDIDO</a>
         </div>
     </div>
     {% endif %}
@@ -85,18 +83,18 @@
     <script>
         let progress = 0;
         const interval = setInterval(() => {
-            progress += Math.floor(Math.random() * 8) + 2;
+            progress += Math.floor(Math.random() * 10) + 2;
             if (progress >= 100) {
                 progress = 100; clearInterval(interval);
                 setTimeout(() => {
                     document.getElementById('splash').style.display = 'none';
                     document.getElementById('page-wrapper').classList.add('show-content');
                     if(document.getElementById('msg-overlay')) document.getElementById('page-wrapper').classList.add('blur-active');
-                }, 600);
+                }, 500);
             }
             document.getElementById('bar').style.width = progress + '%';
             document.getElementById('percent').innerText = progress + '%';
-        }, 60);
+        }, 50);
     </script>
 </body>
 </html>
