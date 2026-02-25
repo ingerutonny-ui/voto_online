@@ -2,51 +2,73 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VOTACIÓN - {{ ciudad }}</title>
+    <title>PAPELETA - {{ ciudad }}</title>
     <style>
-        body { background: #f0f0f0; font-family: Arial, sans-serif; text-align: center; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; padding: 20px; }
-        .casilla { border: 2px solid #333; height: 350px; background: white; cursor: pointer; display: flex; flex-direction: column; }
-        .fondo { flex-grow: 1; background-size: 100% 100%; background-position: center; background-repeat: no-repeat; }
-        .info { background: #eee; padding: 10px; border-top: 1px solid #333; }
-        .btn-votar { background: #c0392b; color: white; padding: 10px; border: none; width: 100%; font-weight: bold; cursor: pointer; }
+        body { background: #bdbdbd; font-family: sans-serif; display: flex; justify-content: center; padding: 20px; }
+        .boleta { background: #fdfaf3; border: 10px double #333; padding: 20px; width: 100%; max-width: 1200px; }
+        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+        .casilla { border: 2px solid #000; height: 380px; background: white; cursor: pointer; display: flex; flex-direction: column; position: relative; }
+        .fondo { flex-grow: 1; background-size: 100% 100%; background-repeat: no-repeat; background-position: center; }
+        .info { background: #eee; border-top: 1px solid #000; padding: 8px; text-align: center; min-height: 80px; }
     </style>
 </head>
 <body>
-    <div style="background:#c0392b; color:white; padding:10px; font-weight:bold;">{{ ciudad }}</div>
-    
-    <div class="grid">
-        {% for p in partidos %}
-            
-            {# --- CONFIGURACIÓN MANUAL DE IMÁGENES --- #}
-            {% set img = 'accion.png' %}
-
-            {% if ciudad == 'ORURO' %}
-                {% if p.nombre == 'FRI' %}{% set img = 'OR-FRI.png' %}
-                {% elif p.nombre == 'LEAL' %}{% set img = 'OR-LEAL.png' %}
-                {% elif p.nombre == 'LIBRE' %}{% set img = 'OR-LIBRE.png' %}
-                {% elif p.nombre == 'SOMOS ORURO' %}{% set img = 'OR-SOMOS.png' %}
+<div class="boleta">
+    <h2 style="text-align:center;">{{ ciudad }}</h2>
+    <form action="/confirmar_voto" method="POST">
+        <div class="grid">
+            {% for p in partidos %}
+                {% set img = 'accion.png' %}
+                
+                {% if ciudad == 'ORURO' %}
+                    {% if p.nombre == 'FRI' %}{% set img = 'OR-FRI.png' %}
+                    {% elif p.nombre == 'LEAL' %}{% set img = 'OR-LEAL.png' %}
+                    {% elif p.nombre == 'NGP' %}{% set img = 'OR-NGP.png' %}
+                    {% elif p.nombre == 'AORA' %}{% set img = 'OR-AORA.png' %}
+                    {% elif p.nombre == 'UN' %}{% set img = 'OR-UN.png' %}
+                    {% elif p.nombre == 'AUPP' %}{% set img = 'OR-AUPP.png' %}
+                    {% elif p.nombre == 'UCS' %}{% set img = 'OR-UCS.png' %}
+                    {% elif p.nombre == 'BST' %}{% set img = 'OR-BST.png' %}
+                    {% elif p.nombre == 'SUMATE' %}{% set img = 'OR-SUMATE.png' %}
+                    {% elif p.nombre == 'MTS' %}{% set img = 'OR-MTS.png' %}
+                    {% elif p.nombre == 'PATRIA' %}{% set img = 'OR-PATRIA.png' %}
+                    {% elif p.nombre == 'LIBRE' %}{% set img = 'OR-LIBRE.png' %}
+                    {% elif p.nombre == 'PP' %}{% set img = 'OR-PP.png' %}
+                    {% elif p.nombre == 'SOMOS ORURO' %}{% set img = 'OR-SOMOS.png' %}
+                    {% elif p.nombre == 'JACHA' %}{% set img = 'OR-JACHA.png' %}
+                    {% endif %}
+                {% elif ciudad == 'LA PAZ' %}
+                    {% if p.nombre == 'Jallalla' %}{% set img = 'LP-JALLALLA.png' %}
+                    {% elif p.nombre == 'ASP' %}{% set img = 'LP-ASP.png' %}
+                    {% elif p.nombre == 'Venceremos' %}{% set img = 'LP-VENCEREMOS.png' %}
+                    {% elif p.nombre == 'Somos La Paz' %}{% set img = 'LP-SOMOSLP.png' %}
+                    {% elif p.nombre == 'UPC' %}{% set img = 'LP-UPC.png' %}
+                    {% elif p.nombre == 'Libre' %}{% set img = 'LP-LIBRE.png' %}
+                    {% elif p.nombre == 'A-UPP' %}{% set img = 'LP-AUPP.png' %}
+                    {% elif p.nombre == 'Innovación Humana' %}{% set img = 'LP-IH.png' %}
+                    {% elif p.nombre == 'VIDA' %}{% set img = 'LP-VIDA.png' %}
+                    {% elif p.nombre == 'FRI' %}{% set img = 'LP-FRI.png' %}
+                    {% elif p.nombre == 'PDC' %}{% set img = 'LP-PDC.png' %}
+                    {% elif p.nombre == 'MTS' %}{% set img = 'LP-MTS.png' %}
+                    {% elif p.nombre == 'NGP' %}{% set img = 'LP-NGP.png' %}
+                    {% elif p.nombre == 'MPS' %}{% set img = 'LP-MPS.png' %}
+                    {% elif p.nombre == 'APB-Súmate' %}{% set img = 'LP-SUMATE.png' %}
+                    {% elif p.nombre == 'Alianza Patria' %}{% set img = 'LP-PATRIA.png' %}
+                    {% elif p.nombre == 'Suma por el Bien Común' %}{% set img = 'LP-SUMA.png' %}
+                    {% endif %}
                 {% endif %}
-            {% elif ciudad == 'LA PAZ' %}
-                {% if p.nombre == 'Jallalla' %}{% set img = 'LP-JALLALLA.png' %}
-                {% elif p.nombre == 'Libre' %}{% set img = 'LP-LIBRE.png' %}
-                {% endif %}
-            {% endif %}
-            {# ---------------------------------------- #}
 
-            <div class="casilla" onclick="this.querySelector('form').submit();">
-                <div class="fondo" style="background-image: url('/static/{{ img }}');"></div>
-                <div class="info">
-                    <strong>{{ p.nombre }}</strong><br>
-                    <small>{{ p.alcalde }}</small>
-                    <form action="/confirmar_voto" method="POST" style="margin-top:10px;">
-                        <input type="hidden" name="partido_id" value="{{ p.id }}">
-                        <button type="submit" class="btn-votar">VOTAR</button>
-                    </form>
+                <div class="casilla" onclick="this.querySelector('input').click();">
+                    <div class="fondo" style="background-image: url('/static/{{ img }}');"></div>
+                    <div class="info">
+                        <strong>{{ p.nombre }}</strong><br>
+                        <small>{{ p.alcalde }}</small>
+                    </div>
+                    <input type="radio" name="partido_id" value="{{ p.id }}" style="display:none;" onchange="this.form.submit()">
                 </div>
-            </div>
-        {% endfor %}
-    </div>
+            {% endfor %}
+        </div>
+    </form>
+</div>
 </body>
 </html>
