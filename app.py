@@ -64,7 +64,7 @@ def index():
         
         # Parámetros para el Frontend
         github_user = "ingerutonny-ui"
-        mensaje = "Base de datos reseteada y partidos cargados correctamente."
+        mensaje = "SISTEMA INICIALIZADO - ELIJA SU CIUDAD"
         
         return render_template('index.html', mensaje=mensaje, github_user=github_user)
         
