@@ -14,7 +14,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# MODELOS DEFINITIVOS
 class Partido(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100))
@@ -31,14 +30,20 @@ class Voto(db.Model):
     edad = db.Column(db.Integer, nullable=False)
     partido_id = db.Column(db.Integer, db.ForeignKey('partido.id'), nullable=False)
 
-# ESTO ROMPE EL BUCLE: LIMPIEZA TOTAL AL ARRANCAR
-with app.app_context():
-    db.drop_all() 
-    db.create_all()
-
 @app.route('/')
 def index():
     return render_template('index.html')
+
+# RUTA PARA RE-INSERTAR PARTIDOS RÁPIDAMENTE
+@app.route('/setup_db')
+def setup_db():
+    db.create_all()
+    # Insertar un partido de prueba para Oruro
+    if not Partido.query.filter_by(nombre='LEAL').first():
+        p1 = Partido(nombre='LEAL', alcalde='ADEMAR WILLCARANI', ciudad='ORURO')
+        db.session.add(p1)
+        db.session.commit()
+    return "Base de datos lista y partido LEAL creado. Ve a /votar/ORURO"
 
 @app.route('/votar/<ciudad>')
 def votar(ciudad):
@@ -49,7 +54,6 @@ def votar(ciudad):
 def confirmar_voto():
     try:
         ci_f = request.form.get('ci', '').strip().upper()
-        # Verificar duplicado para no morir en el intento
         if Voto.query.filter_by(ci=ci_f).first():
             return render_template('index.html', msg_type="error", ci_votante=ci_f)
 
@@ -67,7 +71,9 @@ def confirmar_voto():
         return render_template('index.html', msg_type="success", ci_votante=ci_f)
     except Exception as e:
         db.session.rollback()
-        return render_template('index.html', msg_type="error", ci_votante="SISTEMA")
+        return render_template('index.html', msg_type="error", ci_votante="ERROR")
 
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
