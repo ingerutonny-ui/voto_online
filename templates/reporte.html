@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REPORTE DE VOTACIÓN</title>
+    <style>
+        body { 
+            background: #0f0f0f; color: white; 
+            font-family: 'Segoe UI', sans-serif; padding: 40px; 
+        }
+        .container { max-width: 800px; margin: auto; }
+        h1 { text-align: center; color: #d90429; letter-spacing: 3px; }
+        table { 
+            width: 100%; border-collapse: collapse; margin-top: 30px; 
+            background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden;
+        }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #333; }
+        th { background: #d90429; color: white; text-transform: uppercase; font-size: 0.9rem; }
+        tr:hover { background: rgba(217, 4, 41, 0.1); }
+        .votos-count { font-weight: bold; color: #ff4d4d; font-size: 1.2rem; }
+        .btn-volver {
+            display: inline-block; margin-top: 20px; color: #888; text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CONTEO DE VOTOS TIEMPO REAL</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Ciudad</th>
+                    <th>Partido Político</th>
+                    <th>Total Votos</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in resultados %}
+                <tr>
+                    <td>{{ r.ciudad }}</td>
+                    <td>{{ r.nombre }}</td>
+                    <td class="votos-count">{{ r.total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="/" class="btn-volver">← Volver al inicio</a>
+    </div>
+</body>
+</html>
