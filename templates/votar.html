@@ -3,78 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAPELETA - {{ ciudad }}</title>
+    <title>PAPELETA ELECTORAL - {{ ciudad }}</title>
     <style>
-        body { background: #bdbdbd; font-family: 'Arial Narrow', sans-serif; display: flex; justify-content: center; padding: 20px; }
-        .boleta { background: #fdfaf3; border: 12px double #333; padding: 25px; width: 100%; max-width: 1200px; box-shadow: 10px 10px 0px rgba(0,0,0,0.1); }
-        header { text-align: center; border-bottom: 5px solid #333; margin-bottom: 25px; padding-bottom: 10px; }
-        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; }
-        
-        .casilla {
+        /* ESTÉTICA DE BOLETA REAL */
+        body { 
+            background: #bdbdbd; 
+            font-family: 'Arial Narrow', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            padding: 20px 10px;
+        }
+        .boleta-contenedor {
+            background: #fdfaf3; /* Color papel hueso */
+            border: 12px double #333;
+            padding: 25px;
+            width: 100%;
+            max-width: 1200px;
+            box-shadow: 10px 10px 0px rgba(0,0,0,0.2);
+        }
+        header {
+            text-align: center;
+            border-bottom: 5px solid #333;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+        }
+        /* GRID DE 5 COLUMNAS */
+        .grid-votos {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+        }
+        .tarjeta-partido {
             border: 3px solid #000;
-            height: 380px;
+            height: 400px;
             background-color: #fff;
             position: relative;
             cursor: pointer;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
         }
-
-        /* LÓGICA DE FONDO: Usa Prefijo-Nombre.png (Ej: OR-LIBRE.png) */
-        .fondo {
+        
+        /* AQUÍ SE CARGA EL FONDO QUE TÚ DISEÑAS */
+        .area-diseno {
             flex-grow: 1;
-            background-size: 100% 100%;
+            background-size: 100% 100%; /* Ajuste total al cuadro */
             background-repeat: no-repeat;
             background-position: center;
         }
 
-        .info {
+        /* FRANJA DE DATOS INFERIOR */
+        .datos-candidato {
             background: #eee;
             border-top: 2px solid #000;
-            padding: 10px;
+            padding: 8px 2px;
             text-align: center;
-            min-height: 80px;
+            min-height: 85px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
+        .nombre-partido { font-weight: 900; font-size: 1rem; color: #d32f2f; text-transform: uppercase; }
+        .nombre-alcalde { font-size: 0.8rem; font-weight: bold; line-height: 1.1; margin-top: 4px; }
         
-        .partido-tag { font-weight: 900; color: #d32f2f; text-transform: uppercase; }
-        .alcalde-tag { font-size: 0.8rem; font-weight: bold; margin-top: 5px; display: block; }
-        
-        .marca-x {
-            position: absolute; top: 10px; right: 10px;
-            width: 40px; height: 40px; border: 3px solid #000; background: #fff;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 30px; font-weight: 900; color: transparent;
+        /* CUADRO PARA MARCAR LA X */
+        .cuadro-x {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #000;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 900;
+            color: transparent;
         }
-        .casilla:active .marca-x { color: #d32f2f; }
+        .tarjeta-partido:active .cuadro-x { color: #d32f2f; }
 
-        @media (max-width: 1000px) { .grid { grid-template-columns: repeat(3, 1fr); } }
-        @media (max-width: 600px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+        /* RESPONSIVO PARA TABLETA Y MÓVIL */
+        @media (max-width: 1000px) { .grid-votos { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 600px) { .grid-votos { grid-template-columns: repeat(2, 1fr); } }
     </style>
 </head>
 <body>
 
-<div class="boleta">
+<div class="boleta-contenedor">
     <header>
-        <h1 style="margin:0;">ELECCIONES MUNICIPALES</h1>
-        <div style="background:#333; color:#fff; padding:5px 20px; display:inline-block; font-weight:bold; margin-top:5px;">{{ ciudad }}</div>
+        <h1 style="margin:0; letter-spacing: 2px;">ELECCIONES MUNICIPALES 2026</h1>
+        <div style="background:#333; color:#fff; padding:5px 30px; display:inline-block; font-weight:bold; margin-top:10px; text-transform: uppercase;">
+            {{ ciudad }}
+        </div>
     </header>
 
     <form action="/confirmar_voto" method="POST">
         <input type="hidden" name="ciudad" value="{{ ciudad }}">
-        <div class="grid">
+        
+        <div class="grid-votos">
             {% for p in partidos %}
-            <div class="casilla" onclick="document.getElementById('btn_{{p.id}}').click()">
+            <div class="tarjeta-partido" onclick="document.getElementById('btn_{{p.id}}').click()">
                 
-                <div class="fondo" 
+                <div class="area-diseno" 
                      style="background-image: url('/static/{{ prefijo }}-{{ p.nombre.upper().replace(' ', '').replace('-', '') }}.png');">
                 </div>
 
-                <div class="marca-x">X</div>
+                <div class="cuadro-x">X</div>
 
-                <div class="info">
-                    <div class="partido-tag">{{ p.nombre }}</div>
-                    <span class="alcalde-tag">{{ p.alcalde }}</span>
+                <div class="datos-candidato">
+                    <div class="nombre-partido">{{ p.nombre }}</div>
+                    <div class="nombre-alcalde">{{ p.alcalde }}</div>
                 </div>
 
                 <input type="submit" name="partido_id" value="{{ p.id }}" id="btn_{{p.id}}" style="display:none;">
