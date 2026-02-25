@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -38,23 +38,22 @@ def index():
 
 @app.route('/votar/<ciudad>')
 def votar(ciudad):
-    # Asegura que las tablas existan antes de cualquier consulta
-    db.create_all()
     partidos = Partido.query.filter_by(ciudad=ciudad.upper()).all()
     return render_template('votar.html', ciudad=ciudad.upper(), partidos=partidos)
 
 @app.route('/confirmar_voto', methods=['POST'])
 def confirmar_voto():
-    ci_f = request.form.get('ci', '').strip().upper()
+    # Recolección estricta de datos
+    ci_val = request.form.get('ci', '').strip().upper()
     
-    # Validación manual para evitar choque en PostgreSQL
-    existe = Voto.query.filter_by(ci=ci_f).first()
+    # Verificar duplicado manual
+    existe = Voto.query.filter_by(ci=ci_val).first()
     if existe:
-        return render_template('index.html', msg_type="error", ci_votante=ci_f)
+        return render_template('index.html', msg_type="error", ci_votante=ci_val)
 
     try:
-        nuevo = Voto(
-            ci=ci_f,
+        nuevo_voto = Voto(
+            ci=ci_val,
             nombres=request.form.get('nombres', '').strip().upper(),
             apellido=request.form.get('apellido', '').strip().upper(),
             celular=request.form.get('celular'),
@@ -62,16 +61,17 @@ def confirmar_voto():
             edad=int(request.form.get('edad')),
             partido_id=int(request.form.get('partido_id'))
         )
-        db.session.add(nuevo)
+        db.session.add(nuevo_voto)
         db.session.commit()
-        return render_template('index.html', msg_type="success", ci_votante=ci_f)
+        return render_template('index.html', msg_type="success", ci_votante=ci_val)
     except Exception as e:
         db.session.rollback()
-        return render_template('index.html', msg_type="error", ci_votante=ci_f)
+        return render_template('index.html', msg_type="error", ci_votante=ci_val)
 
+# RESET DE BASE DE DATOS EN CADA DESPLIEGUE
 if __name__ == '__main__':
     with app.app_context():
-        # Descomenta la siguiente línea solo una vez si el error 500 persiste
-        # db.drop_all() 
+        # ESTO ELIMINA EL ERROR 500 DE RAÍZ
+        db.drop_all() 
         db.create_all()
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
