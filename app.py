@@ -1,9 +1,10 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 app = Flask(__name__)
+app.secret_key = 'consulta_ciudadana_secret'
 
 # Configuración con corrección de protocolo y SSL forzado para Render
 uri = os.environ.get('DATABASE_URL')
@@ -12,13 +13,7 @@ if uri and uri.startswith("postgres://"):
 
 app.config['SQLALCHEMY_DATABASE_URI'] = uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-# Configuración de argumentos de conexión para evitar el cierre de SSL
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    "connect_args": {
-        "sslmode": "require"
-    }
-}
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {"connect_args": {"sslmode": "require"}}
 
 db = SQLAlchemy(app)
 
@@ -41,35 +36,59 @@ class Partido(db.Model):
 @app.route('/')
 def index():
     try:
-        # Lógica de base de datos
-        db.drop_all() 
+        # Solo inicializar si es necesario o resetear según tu flujo
         db.create_all()
+        if not Partido.query.first():
+            partidos_lista = []
+            ciudades = ["ORURO", "LA PAZ"]
+            for ciudad in ciudades:
+                for i in range(1, 16):
+                    partidos_lista.append(Partido(
+                        nombre=f"PARTIDO {i}", alcalde=f"Candidato {i}", 
+                        concejal=f"Concejal {i}", ciudad=ciudad
+                    ))
+            db.session.bulk_save_objects(partidos_lista)
+            db.session.commit()
         
-        partidos_lista = []
-        ciudades = ["ORURO", "LA PAZ"]
-        
-        for ciudad in ciudades:
-            for i in range(1, 16):
-                partidos_lista.append(
-                    Partido(
-                        nombre=f"PARTIDO {i}", 
-                        alcalde=f"Candidato {i}", 
-                        concejal=f"Concejal {i}",
-                        ciudad=ciudad
-                    )
-                )
-        
-        db.session.bulk_save_objects(partidos_lista)
-        db.session.commit()
-        
-        # Parámetros para el Frontend
-        github_user = "ingerutonny-ui"
-        mensaje = "SISTEMA INICIALIZADO - ELIJA SU CIUDAD"
-        
-        return render_template('index.html', mensaje=mensaje, github_user=github_user)
-        
+        return render_template('index.html', mensaje="SISTEMA INICIALIZADO - ELIJA SU CIUDAD")
     except Exception as e:
-        return f"Error en el sistema: {str(e)}"
+        return f"Error: {str(e)}"
+
+@app.route('/votar/<ciudad>')
+def votar(ciudad):
+    partidos = Partido.query.filter_by(ciudad=ciudad).all()
+    return render_template('votar.html', ciudad=ciudad, partidos=partidos)
+
+@app.route('/confirmar_voto', methods=['POST'])
+def confirmar_voto():
+    partido_id = request.form.get('partido_id')
+    ciudad = request.form.get('ciudad')
+    partido = Partido.query.get(partido_id)
+    return render_template('confirmar.html', partido=partido, ciudad=ciudad)
+
+@app.route('/registrar_voto', methods=['POST'])
+def registrar_voto():
+    ci = request.form.get('ci')
+    partido_id = request.form.get('partido_id')
+    
+    # Verificación de votante
+    votante = Votante.query.get(ci)
+    if votante and votante.ya_voto:
+        return render_template('error.html', mensaje="Usted ya emitió su voto.")
+    
+    # Registro de voto
+    if not votante:
+        votante = Votante(ci=ci, ya_voto=True)
+        db.session.add(votante)
+    else:
+        votante.ya_voto = True
+        
+    partido = Partido.query.get(partido_id)
+    partido.votos_alcalde += 1
+    partido.votos_concejal += 1
+    
+    db.session.commit()
+    return render_template('exito.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
