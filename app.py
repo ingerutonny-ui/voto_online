@@ -16,40 +16,84 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {"connect_args": {"sslmode": "prefer"}
 
 db = SQLAlchemy(app)
 
-# --- MODELOS ---
 class Votante(db.Model):
     ci = db.Column(db.String(20), primary_key=True)
-    ciudad = db.Column(db.String(50))
     ya_voto = db.Column(db.Boolean, default=False)
 
 class Partido(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(100), nullable=False)
-    alcalde = db.Column(db.String(100), nullable=False)
-    concejal = db.Column(db.String(100), nullable=False)
-    ciudad = db.Column(db.String(50), nullable=False)
-    votos_alcalde = db.Column(db.Integer, default=0)
+    nombre = db.Column(db.String(100))
+    alcalde = db.Column(db.String(100))
+    ciudad = db.Column(db.String(50))
 
 @app.route('/')
 def index():
     try:
+        db.drop_all()
         db.create_all()
-        # Aquí ya están cargados los 15 de Oruro y 17 de La Paz según los chats anteriores
-        return render_template('index.html', mensaje="SISTEMA LISTO")
+        
+        # ==========================================================
+        # SECCIÓN PARA EDITAR CANDIDATOS (Cualquiera puede cambiar esto)
+        # ==========================================================
+        
+        # LISTA ORURO
+        datos_oruro = [
+            ["FRI", "Rene Roberto Mamani Llave"],
+            ["LEAL", "Adhemar Willcarani Morales"],
+            ["NGP", "Iván Quispe Gutiérrez"],
+            ["AORA", "Santiago Condori Apaza"],
+            ["UN", "Enrique Fernando Urquidi Daza"],
+            ["AUPP", "Juan Carlos Choque Zubieta"],
+            ["UCS", "Lino Marcos Main Adrián"],
+            ["BST", "Edgar Rafael Bazán Ortega"],
+            ["SUMATE", "Oscar Miguel Toco Choque"],
+            ["MTS", "Oliver Oscar Poma Cartagena"],
+            ["PATRIA", "Rafael Vargas Villegas"],
+            ["LIBRE", "Rene Benjamin Guzman Vargas"], # <-- Si cambia el nombre, editas aquí
+            ["PP", "Carlos Aguilar"],
+            ["SOMOS ORURO", "Marcelo Cortez Gutiérrez"],
+            ["JACHA", "Marcelo Fernando Medina Centellas"]
+        ]
+
+        # LISTA LA PAZ
+        datos_lapaz = [
+            ["Jallalla", "Jhonny Plata"],
+            ["ASP", "Xavier Iturralde"],
+            ["Venceremos", "Waldo Albarracín"],
+            ["Somos La Paz", "Miguel Roca"],
+            ["UPC", "Luis Eduardo Siles"],
+            ["Libre", "Carlos Palenque"],
+            ["A-UPP", "Isaac Fernández"],
+            ["Innovación Humana", "César Dockweiler"],
+            ["VIDA", "Fernando Valencia"],
+            ["FRI", "Raúl Daza"],
+            ["PDC", "Mario Silva"],
+            ["MTS", "Jorge Dulon"],
+            ["NGP", "Hernán Rodrigo Rivera"],
+            ["MPS", "Ricardo Cuevas"],
+            ["APB-Súmate", "Óscar Sogliano"],
+            ["Alianza Patria", "Carlos Nemo Rivera"],
+            ["Suma por el Bien Común", "Iván Arias"]
+        ]
+
+        # PROCESO AUTOMÁTICO DE CARGA
+        p_list = []
+        for d in datos_oruro:
+            p_list.append(Partido(nombre=d[0], alcalde=d[1], ciudad="ORURO"))
+        for d in datos_lapaz:
+            p_list.append(Partido(nombre=d[0], alcalde=d[1], ciudad="LA PAZ"))
+        
+        db.session.bulk_save_objects(p_list)
+        db.session.commit()
+        return render_template('index.html', mensaje="SISTEMA REINICIADO")
     except Exception as e:
         return f"Error: {str(e)}"
 
 @app.route('/votar/<ciudad>')
 def votar(ciudad):
     partidos = Partido.query.filter_by(ciudad=ciudad).order_by(Partido.id).all()
-    # PREFIJO AUTOMÁTICO: OR para Oruro, LP para La Paz
     prefijo = "OR" if ciudad == "ORURO" else "LP"
     return render_template('votar.html', ciudad=ciudad, partidos=partidos, prefijo=prefijo)
-
-@app.route('/confirmar_voto', methods=['POST'])
-def confirmar_voto():
-    p = Partido.query.get(request.form.get('partido_id'))
-    return render_template('confirmar.html', partido=p, ciudad=request.form.get('ciudad'))
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
