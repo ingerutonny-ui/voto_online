@@ -18,7 +18,7 @@ db = SQLAlchemy(app)
 # MODELOS
 class Votante(db.Model):
     ci = db.Column(db.String(20), primary_key=True)
-    ciudad = db.Column(db.String(50)) # Oruro o La Paz
+    ciudad = db.Column(db.String(50))
     ya_voto = db.Column(db.Boolean, default=False)
     fecha_voto = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -27,35 +27,34 @@ class Partido(db.Model):
     nombre = db.Column(db.String(100), nullable=False)
     alcalde = db.Column(db.String(100), nullable=False)
     concejal = db.Column(db.String(100), nullable=False)
-    ciudad = db.Column(db.String(50), nullable=False) # Distingue entre Oruro y La Paz
+    ciudad = db.Column(db.String(50), nullable=False)
     votos_alcalde = db.Column(db.Integer, default=0)
     votos_concejal = db.Column(db.Integer, default=0)
 
 @app.route('/')
 def index():
     try:
+        # ESTO BORRA TODO LO ANTERIOR Y CREA LO NUEVO
+        db.drop_all() 
         db.create_all()
-        # Verificar si ya hay partidos para no duplicar datos
-        if Partido.query.count() == 0:
-            partidos_lista = []
-            ciudades = ["ORURO", "LA PAZ"]
-            
-            for ciudad in ciudades:
-                for i in range(1, 16):
-                    partidos_lista.append(
-                        Partido(
-                            nombre=f"PARTIDO {i} {ciudad}", 
-                            alcalde=f"Alcalde {i}", 
-                            concejal=f"Concejal {i}",
-                            ciudad=ciudad
-                        )
-                    )
-            
-            db.session.bulk_save_objects(partidos_lista)
-            db.session.commit()
-            return f"CONSULTA CIUDADANA: Tablas creadas y {len(partidos_lista)} partidos cargados (Oruro y La Paz)."
         
-        return "CONSULTA CIUDADANA: El sistema está operativo."
+        partidos_lista = []
+        ciudades = ["ORURO", "LA PAZ"]
+        
+        for ciudad in ciudades:
+            for i in range(1, 16):
+                partidos_lista.append(
+                    Partido(
+                        nombre=f"PARTIDO {i}", 
+                        alcalde=f"Candidato {i}", 
+                        concejal=f"Concejal {i}",
+                        ciudad=ciudad
+                    )
+                )
+        
+        db.session.bulk_save_objects(partidos_lista)
+        db.session.commit()
+        return f"CONSULTA CIUDADANA: Base de datos reseteada. 30 partidos cargados correctamente."
     except Exception as e:
         return f"Error en el sistema: {str(e)}"
 
