@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CONSULTA CIUDADANA MUNICIPAL</title>
     <style>
-        :root { --accent: #444; --nancy-dark: #1a1a1a; --soft-grey: #f8f9fa; --voto-azul: #0000ff; --error-rojo: #ff0000; }
+        :root { --accent: #444; --nancy-dark: #1a1a1a; --soft-grey: #f8f9fa; }
         body, html { margin:0; padding:0; width:100%; min-height:100%; font-family: 'Segoe UI', sans-serif; background:#ffffff; overflow-x: hidden; }
 
         #splash {
@@ -27,7 +27,6 @@
         .line { width:80px; height:5px; background:#000; margin:20px auto 35px; border-radius:10px; }
 
         .btn-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; justify-content: center; }
-        
         .btn-city { background: #ffffff; border: 1px solid #eee; padding: 30px 15px; border-radius: 30px; text-decoration: none; transition: 0.3s; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
         .btn-city:hover { transform: translateY(-5px); background: var(--soft-grey); border-color: #ccc; }
         .btn-city img { width: 100%; max-width: 150px; height: auto; object-fit: contain; margin-bottom: 15px; }
@@ -36,15 +35,14 @@
         .monitoreo-link-container { margin-top: 40px; border-top: 1px solid #eee; padding-top: 25px; }
         .link-monitoreo { color: #999; text-decoration: none; font-size: 0.85rem; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
 
-        /* MENSAJES DINÁMICOS POR TIPO */
         .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(15px); display: none; align-items:center; justify-content:center; z-index: 9999; padding: 20px; box-sizing: border-box; }
         .msg-content { background: white; padding: 40px 20px; border-radius: 40px; box-shadow: 0 25px 70px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 450px; border: 1px solid #eee; }
         
-        /* CLASES DINÁMICAS AZUL Y ROJO */
-        .txt-success { color: var(--voto-azul) !important; }
-        .bg-success { background: var(--voto-azul) !important; }
-        .txt-error { color: var(--error-rojo) !important; }
-        .bg-error { background: var(--error-rojo) !important; }
+        /* COLORES DINÁMICOS */
+        .color-exito { color: #0000ff !important; }
+        .color-error { color: #ff0000 !important; }
+        .bg-exito { background: #0000ff !important; }
+        .bg-error { background: #ff0000 !important; }
 
         .ci-box { padding: 15px; border-radius: 20px; font-weight: 900; font-size: 1.8rem; color: #fff; margin: 20px 0; word-break: break-all; }
         .btn-volver { display: inline-block; padding: 15px 40px; background: #000; color: white; text-decoration: none; border-radius: 20px; font-weight: 900; text-transform: uppercase; width: 100%; max-width: 200px; box-sizing: border-box; }
@@ -81,14 +79,12 @@
     {% if msg_type %}
     <div class="overlay" id="msg-overlay" style="display: flex;">
         <div class="msg-content">
-            <h2 style="font-weight: 900; font-size: 1.2rem;" class="{{ 'txt-success' if msg_type == 'success' else 'txt-error' }}">
+            <h2 style="font-weight: 900; font-size: 1.2rem;" class="{{ 'color-exito' if msg_type == 'success' else 'color-error' }}">
                 {{ '¡VOTO REGISTRADO!' if msg_type == 'success' else 'YA VOTÓ ANTERIORMENTE' }}
             </h2>
-            
-            <div class="ci-box {{ 'bg-success' if msg_type == 'success' else 'bg-error' }}">
+            <div class="ci-box {{ 'bg-exito' if msg_type == 'success' else 'bg-error' }}">
                 {{ ci_votante }}
             </div>
-            
             <a href="/" class="btn-volver">CONTINUAR</a>
         </div>
     </div>
