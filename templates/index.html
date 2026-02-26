@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CONSULTA CIUDADANA MUNICIPAL</title>
     <style>
-        :root { --accent: #444; --nancy-dark: #1a1a1a; --soft-grey: #f8f9fa; }
+        :root { --accent: #444; --nancy-dark: #1a1a1a; }
         body, html { margin:0; padding:0; width:100%; height:100%; font-family: 'Segoe UI', sans-serif; background:#ffffff; overflow-x: hidden; }
 
         #splash {
@@ -15,81 +15,53 @@
         }
         
         .splash-header { 
-            display: flex; 
-            gap: 40px; 
-            align-items: center; 
-            justify-content: center; 
-            width: 90%; 
-            max-width: 800px;
-            margin-bottom: 30px;
+            display: flex; gap: 20px; align-items: center; justify-content: center; 
+            width: 90%; max-width: 600px; margin-bottom: 30px;
         }
-        .splash-header img { width: 40%; height: auto; object-fit: contain; }
+        .splash-header img { width: 45%; height: auto; max-height: 200px; object-fit: contain; }
 
-        .loader-container { width: 70%; max-width: 400px; height: 14px; background: #eee; border-radius: 20px; overflow: hidden; }
+        .loader-container { width: 70%; max-width: 300px; height: 10px; background: #eee; border-radius: 20px; overflow: hidden; }
         .loader-bar { width: 0%; height: 100%; background: #000; transition: width 0.1s linear; }
-        .loader-text { margin-top: 15px; font-weight: 900; color: #000; font-size: 2.5rem; }
+        .loader-text { margin-top: 15px; font-weight: 900; color: #000; font-size: 2rem; }
 
         .wrapper { display:flex; align-items:center; justify-content:center; min-height:100vh; padding: 15px; box-sizing: border-box; transition: 0.6s; opacity: 0; pointer-events: none; }
         .show-content { opacity: 1; pointer-events: auto; }
         .blur-active { filter: blur(15px); pointer-events: none; }
 
-        .hero-card { background:white; padding:40px 20px; border-radius:40px; box-shadow:0 15px 50px rgba(0,0,0,0.05); text-align:center; width:100%; max-width:850px; border: 1px solid #eee; box-sizing: border-box; }
-        h1 { font-size: 1.8rem; letter-spacing:1px; margin:0; color:var(--nancy-dark); font-weight:900; text-transform: uppercase; line-height: 1.2; }
-        .line { width:80px; height:5px; background:#000; margin:20px auto 35px; border-radius:10px; }
+        .hero-card { background:white; padding:30px 15px; border-radius:40px; box-shadow:0 15px 50px rgba(0,0,0,0.05); text-align:center; width:100%; max-width:850px; border: 1px solid #eee; box-sizing: border-box; }
+        h1 { font-size: 1.6rem; letter-spacing:1px; margin:0; color:var(--nancy-dark); font-weight:900; text-transform: uppercase; }
+        .line { width:60px; height:5px; background:#000; margin:15px auto 25px; border-radius:10px; }
 
-        .btn-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; justify-content: center; width: 100%; }
-        .btn-city { background: #ffffff; border: 1px solid #eee; padding: 25px 15px; border-radius: 30px; text-decoration: none; transition: 0.3s; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
-        .btn-city img { width: 100%; max-width: 120px; height: auto; object-fit: contain; margin-bottom: 15px; }
-        .btn-city span { font-weight: 900; color: #000; font-size: 1.3rem; }
+        .btn-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; width: 100%; }
+        .btn-city { background: #ffffff; border: 1px solid #eee; padding: 20px; border-radius: 25px; text-decoration: none; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
+        .btn-city img { width: 100%; max-width: 100px; height: auto; margin-bottom: 10px; }
+        .btn-city span { font-weight: 900; color: #000; font-size: 1.2rem; }
 
-        .monitoreo-link-container { margin-top: 40px; border-top: 1px solid #eee; padding-top: 25px; width: 100%; display: flex; justify-content: center; }
+        .monitoreo-link-container { margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; width: 100%; }
         .btn-resultados { 
-            display: block;
-            width: 100%;
-            max-width: 500px;
-            padding: 12px 20px;
-            border: 1px solid #ddd;
-            border-radius: 50px;
-            color: #888;
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: 0.3s;
-            box-sizing: border-box;
+            display: block; width: 100%; max-width: 400px; margin: 0 auto; padding: 12px;
+            border: 1px solid #ddd; border-radius: 50px; color: #888; text-decoration: none;
+            font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 2px;
         }
-        .btn-resultados:hover { background: #f0f0f0; color: #000; }
 
-        .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(15px); display: none; align-items:center; justify-content:center; z-index: 9999; padding: 20px; }
-        .msg-content { background: white; padding: 40px 20px; border-radius: 40px; box-shadow: 0 25px 70px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 450px; border: 1px solid #eee; }
+        .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.95); display: none; align-items:center; justify-content:center; z-index: 9999; }
+        .msg-content { background: white; padding: 30px; border-radius: 40px; text-align: center; width: 90%; max-width: 400px; border: 1px solid #eee; }
         
-        .color-exito { color: #0000ff !important; }
-        .color-error { color: #ff0000 !important; }
-        .bg-exito { background: #0000ff !important; }
-        .bg-error { background: #ff0000 !important; }
+        .ci-box { padding: 15px; border-radius: 20px; font-weight: 900; font-size: 1.5rem; color: #fff; margin: 15px 0; }
+        .btn-volver { display: inline-block; padding: 12px 30px; background: #000; color: white; text-decoration: none; border-radius: 15px; font-weight: 900; }
 
-        .ci-box { padding: 15px; border-radius: 20px; font-weight: 900; font-size: 1.8rem; color: #fff; margin: 20px 0; }
-        .btn-volver { display: inline-block; padding: 15px 40px; background: #000; color: white; text-decoration: none; border-radius: 20px; font-weight: 900; text-transform: uppercase; }
-
-        /* RESPONSIVIDAD PARA CELULARES */
-        @media (max-width: 600px) {
-            .splash-header { gap: 15px; }
-            .splash-header img { width: 45%; }
-            .loader-text { font-size: 1.8rem; }
+        @media (max-width: 480px) {
             h1 { font-size: 1.3rem; }
-            .btn-container { grid-template-columns: 1fr; }
-            .hero-card { padding: 30px 15px; }
-            .btn-city { padding: 20px 10px; }
-            .btn-resultados { font-size: 0.75rem; width: 90%; }
+            .btn-city span { font-size: 1rem; }
+            .loader-text { font-size: 1.5rem; }
         }
     </style>
 </head>
 <body>
     <div id="splash">
         <div class="splash-header">
-            <img src="/static/accion2.png" alt="Horizonte">
-            <img src="/static/accion.png" alt="Accion">
+            <img src="/static/accion2.png" onerror="this.src='/static/accion.png'">
+            <img src="/static/accion.png">
         </div>
         <div class="loader-container"><div class="loader-bar" id="bar"></div></div>
         <div class="loader-text" id="percent">0%</div>
@@ -97,7 +69,7 @@
 
     <div class="wrapper" id="page-wrapper">
         <div class="hero-card">
-            <h1>CONSULTA CIUDADANA<br><span style="color:#888; font-size: 0.9rem; font-weight: 400;">MUNICIPAL</span></h1>
+            <h1>CONSULTA CIUDADANA<br><span style="color:#888; font-size: 0.8rem; font-weight: 400;">MUNICIPAL</span></h1>
             <div class="line"></div>
             <div class="btn-container">
                 <a href="/votar/ORURO" class="btn-city"><img src="/static/oruro.png"><span>ORURO</span></a>
@@ -112,10 +84,10 @@
     {% if msg_type %}
     <div class="overlay" id="msg-overlay" style="display: flex;">
         <div class="msg-content">
-            <h2 style="font-weight: 900;" class="{{ 'color-exito' if msg_type == 'success' else 'color-error' }}">
+            <h2 style="font-weight: 900; color: {{ '#0000ff' if msg_type == 'success' else '#ff0000' }};">
                 {{ 'GRACIAS POR VOTAR' if msg_type == 'success' else 'USTED YA VOTÓ...!!!' }}
             </h2>
-            <div class="ci-box {{ 'bg-exito' if msg_type == 'success' else 'bg-error' }}">
+            <div class="ci-box" style="background: {{ '#0000ff' if msg_type == 'success' else '#ff0000' }};">
                 {{ ci_votante }}
             </div>
             <a href="/" class="btn-volver">CONTINUAR</a>
@@ -128,27 +100,19 @@
             let progress = 0;
             const bar = document.getElementById('bar');
             const percent = document.getElementById('percent');
-            const splash = document.getElementById('splash');
-            const wrapper = document.getElementById('page-wrapper');
-
             const interval = setInterval(() => {
-                progress += Math.floor(Math.random() * 8) + 4;
+                progress += 5;
                 if (progress >= 100) {
-                    progress = 100;
                     clearInterval(interval);
                     setTimeout(() => {
-                        splash.style.transition = 'opacity 0.5s';
-                        splash.style.opacity = '0';
-                        setTimeout(() => {
-                            splash.style.display = 'none';
-                            wrapper.classList.add('show-content');
-                            if(document.getElementById('msg-overlay')) wrapper.classList.add('blur-active');
-                        }, 500);
-                    }, 400);
+                        document.getElementById('splash').style.display = 'none';
+                        document.getElementById('page-wrapper').classList.add('show-content');
+                        if(document.getElementById('msg-overlay')) document.getElementById('page-wrapper').classList.add('blur-active');
+                    }, 300);
                 }
                 bar.style.width = progress + '%';
                 percent.innerText = progress + '%';
-            }, 60);
+            }, 50);
         });
     </script>
 </body>
