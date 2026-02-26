@@ -5,7 +5,6 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 app.secret_key = 'consulta_ciudadana_nancy_2026'
 
-# Configuración de Base de Datos para Render (PostgreSQL) o Local (SQLite)
 uri = os.environ.get('DATABASE_URL')
 if uri and uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql://", 1)
@@ -15,7 +14,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# MODELOS
 class Partido(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100))
@@ -32,23 +30,10 @@ class Voto(db.Model):
     edad = db.Column(db.Integer, nullable=False)
     partido_id = db.Column(db.Integer, db.ForeignKey('partido.id'), nullable=False)
 
-@app.route('/')
-def index():
-    db.create_all()
-    return render_template('index.html')
-
-@app.route('/votar/<ciudad>')
-def votar(ciudad):
-    ciudad_up = ciudad.upper()
-    # Asegura que los candidatos existan antes de cargar la página
-    restaurar_nombres_interna()
-    partidos = Partido.query.filter_by(ciudad=ciudad_up).all()
-    return render_template('votar.html', ciudad=ciudad_up, partidos=partidos)
-
-def restaurar_nombres_interna():
+def restaurar_datos():
     db.create_all()
     data = [
-        # ORURO - LISTA SEGÚN PDF
+        # ORURO (15 CANDIDATOS - SEGÚN PDF)
         {'n': 'FRI', 'a': 'RENE ROBERTO MAMANI LLAVE', 'c': 'ORURO'},
         {'n': 'LEAL', 'a': 'ADEMAR WILLCARANI MORALES', 'c': 'ORURO'},
         {'n': 'NGP', 'a': 'IVÁN QUISPE GUTIÉRREZ', 'c': 'ORURO'},
@@ -65,15 +50,15 @@ def restaurar_nombres_interna():
         {'n': 'JACHA', 'a': 'MARCELO FERNANDO MEDINA CENTELLAS', 'c': 'ORURO'},
         {'n': 'SOL.BO', 'a': 'MARCELO MEDINA', 'c': 'ORURO'},
 
-        # LA PAZ (17 CANDIDATOS)
-        {'n': 'JALLALLA', 'a': 'JHONNY PLATA', 'c': 'LA PAZ'},
+        # LA PAZ (LISTA COMPLETA)
+        {'n': 'JALLALLA', 'a': 'SANTOS QUISPE (REMPLAZO)', 'c': 'LA PAZ'},
         {'n': 'ASP', 'a': 'XAVIER ITURRALDE', 'c': 'LA PAZ'},
-        {'n': 'VENCEREMOS', 'a': 'WALDO ALBARRACIN', 'c': 'LA PAZ'},
+        {'n': 'VENCEREMOS', 'a': 'AMILCAR BARRAL', 'c': 'LA PAZ'},
         {'n': 'SOMOS LA PAZ', 'a': 'MIGUEL ROCA', 'c': 'LA PAZ'},
         {'n': 'UPC', 'a': 'LUIS EDUARDO SILES', 'c': 'LA PAZ'},
         {'n': 'LIBRE', 'a': 'CARLOS CORDERO', 'c': 'LA PAZ'},
         {'n': 'MTS', 'a': 'FELIX PATZI', 'c': 'LA PAZ'},
-        {'n': 'PAN-BOL', 'a': 'AMILCAR BARRAL', 'c': 'LA PAZ'},
+        {'n': 'PAN-BOL', 'a': 'ABDULIA JALIRI', 'c': 'LA PAZ'},
         {'n': 'SOL.BO', 'a': 'ALVARO BLONDEL', 'c': 'LA PAZ'},
         {'n': 'UNIDOS', 'a': 'PEDRO SUSZ', 'c': 'LA PAZ'},
         {'n': 'UCS', 'a': 'PETER MALDONADO', 'c': 'LA PAZ'},
@@ -89,41 +74,49 @@ def restaurar_nombres_interna():
             db.session.add(Partido(nombre=p['n'], alcalde=p['a'], ciudad=p['c']))
     db.session.commit()
 
+@app.route('/')
+def index():
+    restaurar_datos()
+    return render_template('index.html')
+
+@app.route('/votar/<ciudad>')
+def votar(ciudad):
+    restaurar_datos()
+    partidos = Partido.query.filter_by(ciudad=ciudad.upper()).all()
+    return render_template('votar.html', ciudad=ciudad.upper(), partidos=partidos)
+
 @app.route('/confirmar_voto', methods=['POST'])
 def confirmar_voto():
+    ci_f = request.form.get('ci', '').strip().upper()
+    if Voto.query.filter_by(ci=ci_f).first():
+        return render_template('index.html', msg_type="error", ci_votante=ci_f)
     try:
-        ci_f = request.form.get('ci', '').strip().upper()
-        if Voto.query.filter_by(ci=ci_f).first():
-            return render_template('index.html', msg_type="error", ci_votante=ci_f)
-
         nuevo_voto = Voto(
             ci=ci_f,
-            nombres=request.form.get('nombres', '').strip().upper(),
-            apellido=request.form.get('apellido', '').strip().upper(),
+            nombres=request.form.get('nombres', '').upper(),
+            apellido=request.form.get('apellido', '').upper(),
             celular=request.form.get('celular'),
-            genero=request.form.get('genero', '').upper(),
+            genero=request.form.get('genero'),
             edad=int(request.form.get('edad')),
             partido_id=int(request.form.get('partido_id'))
         )
         db.session.add(nuevo_voto)
         db.session.commit()
         return render_template('index.html', msg_type="success", ci_votante=ci_f)
-    except Exception:
+    except:
         db.session.rollback()
-        return render_template('index.html', msg_type="error", ci_votante="ERROR")
+        return redirect(url_for('index'))
 
 @app.route('/reporte')
 def reporte():
-    # Consulta para el gráfico de barras: cuenta votos por cada partido
     resultados = db.session.query(
         Partido.nombre, 
         Partido.ciudad, 
         db.func.count(Voto.id).label('total')
-    ).join(Voto, Voto.partido_id == Partido.id).group_by(Partido.id).order_by(db.func.count(Voto.id).desc()).all()
-    
+    ).outerjoin(Voto).group_by(Partido.id).order_by(db.func.count(Voto.id).desc()).all()
     return render_template('reporte.html', resultados=resultados)
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()
+        restaurar_datos()
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
