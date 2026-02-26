@@ -8,10 +8,19 @@
     <style>
         :root { --dark: #000; --grey-light: #f4f4f4; --grey-border: #ddd; }
         
-        /* ELIMINACIÓN DE HOJA EN BLANCO: Margen cero en @page */
-        @page { size: auto; margin: 0; } 
+        /* FIX DEFINITIVO HOJA EN BLANCO */
+        @page { 
+            size: auto; 
+            margin: 0mm; /* Elimina márgenes físicos de la página */
+        } 
         
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; margin: 0; padding: 30px; color: #000; }
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            background: #fff; 
+            margin: 0; 
+            padding: 30px; 
+            color: #000;
+        }
         
         .header-reporte { text-align: center; border-bottom: 4px solid var(--dark); padding-bottom: 20px; margin-bottom: 40px; }
         h1 { text-transform: uppercase; font-weight: 900; margin: 0; font-size: 2rem; letter-spacing: 2px; }
@@ -35,14 +44,20 @@
 
         .btn-pdf { display: block; width: 100%; max-width: 300px; margin: 50px auto; padding: 20px; background: var(--dark); color: #fff; text-align: center; text-decoration: none; font-weight: 900; border-radius: 15px; text-transform: uppercase; cursor: pointer; border: none; }
 
-        /* CONFIGURACIÓN CRÍTICA PARA IMPRESIÓN */
         @media print { 
-            html, body { margin: 0; padding: 0; border: none; }
-            body { padding: 15mm; } /* El margen se controla aquí, no en @page */
-            .btn-pdf { display: none; } 
-            .chart-container { border: none; margin-top: 10px; }
-            .header-reporte { margin-top: 0; padding-top: 0; }
-            .ciudad-section { page-break-before: auto; }
+            /* Forzamos que el contenido empiece en el borde superior exacto */
+            html, body { 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                overflow: visible !important;
+            }
+            body { padding: 10mm !important; } /* Margen interno para que no toque los bordes del papel */
+            
+            .btn-pdf { display: none !important; } 
+            .header-reporte { margin-top: 0 !important; }
+            
+            /* Evita saltos de página antes del primer título */
+            .header-reporte { page-break-before: avoid; }
         }
     </style>
 </head>
