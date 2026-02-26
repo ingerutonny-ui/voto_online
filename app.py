@@ -28,25 +28,53 @@ def obtener_partidos(ciudad):
         {"id": 15 + offset, "nombre": "PDC", "alcalde": "ANA MARÍA FLORES"}
     ]
 
+@app.route('/')
+def index():
+    return render_template('index.html', msg_type=request.args.get('msg_type'), ci=request.args.get('ci'))
+
+@app.route('/votar/<ciudad>')
+def votar(ciudad):
+    c_nom = ciudad.upper().replace("_", " ")
+    return render_template('votar.html', ciudad=c_nom, partidos=obtener_partidos(c_nom))
+
+@app.route('/confirmar_voto', methods=['POST'])
+def confirmar_voto():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute('''INSERT INTO votos (ci, nombres, apellido, edad, genero, celular, partido_id) 
+                       VALUES (%s, %s, %s, %s, %s, %s, %s)''', 
+                    (request.form['ci'], request.form['nombres'].upper(), request.form['apellido'].upper(), 
+                     request.form['edad'], request.form['genero'], request.form['celular'], request.form['partido_id']))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return redirect(url_for('index', msg_type='success', ci=request.form['ci']))
+    except:
+        return redirect(url_for('index', msg_type='error', ci=request.form['ci']))
+
 @app.route('/reporte')
 def reporte():
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute('SELECT partido_id, COUNT(*) FROM votos GROUP BY partido_id')
-    conteos = dict(cur.fetchall())
-    cur.close()
-    conn.close()
-    
-    res = {}
-    totales = {}
-    for ciudad in ["ORURO", "LA PAZ"]:
-        lista = obtener_partidos(ciudad)
-        suma = 0
-        for p in lista:
-            p['votos'] = conteos.get(p['id'], 0)
-            suma += p['votos']
-        res[ciudad] = lista
-        totales[ciudad] = suma
-    return render_template('reporte.html', resultados=res, totales=totales)
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute('SELECT partido_id, COUNT(*) FROM votos GROUP BY partido_id')
+        conteos = dict(cur.fetchall())
+        cur.close()
+        conn.close()
+        res = {}
+        totales = {}
+        for ciudad in ["ORURO", "LA PAZ"]:
+            lista = obtener_partidos(ciudad)
+            suma = 0
+            for p in lista:
+                p['votos'] = conteos.get(p['id'], 0)
+                suma += p['votos']
+            res[ciudad] = lista
+            totales[ciudad] = suma
+        return render_template('reporte.html', resultados=res, totales=totales)
+    except Exception as e:
+        return f"Error en Reporte: {str(e)}", 500
 
-# ... (mantener rutas de index y votar que ya funcionan)
+if __name__ == '__main__':
+    app.run()
