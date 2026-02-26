@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, redirect, url_for
 app = Flask(__name__)
 
 def get_db_connection():
-    # Conexión obligatoria para evitar pérdida de datos en la nube
+    # Conexión persistente a PostgreSQL en la nube
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     return conn
 
@@ -74,17 +74,24 @@ def confirmar_voto():
             cur.close()
             conn.close()
             return redirect(url_for('index', msg_type='error', ci=ci))
-        # Mapeo completo de campos P1, P2 y P3
+        
+        # Mapeo P1, P2 y P3
         cur.execute('''INSERT INTO votos (ci, nombres, apellido, edad, genero, celular, partido_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)''', (ci, request.form.get('nombres').upper(), 
-            request.form.get('apellido').upper(), request.form.get('edad'), request.form.get('genero'),
-            request.form.get('celular'), request.form.get('partido_id')))
+            VALUES (%s, %s, %s, %s, %s, %s, %s)''', (
+            ci, 
+            request.form.get('nombres').upper(), 
+            request.form.get('apellido').upper(), 
+            request.form.get('edad'), 
+            request.form.get('genero'),
+            request.form.get('celular'), 
+            request.form.get('partido_id')
+        ))
         conn.commit()
         cur.close()
         conn.close()
         return redirect(url_for('index', msg_type='success', ci=ci))
     except Exception as e:
-        return f"Error crítico en base de datos: {str(e)}", 500
+        return f"Error Crítico: {str(e)}", 500
 
 @app.route('/reporte')
 def reporte():
@@ -100,8 +107,11 @@ def reporte():
             p['votos'] = conteos.get(p['id'], 0)
         return render_template('generar_reporte.html', partidos=todos_partidos)
     except Exception as e:
-        return f"Error al generar reporte: {str(e)}", 500
+        return f"Error Reporte: {str(e)}", 500
 
 if __name__ == '__main__':
+    # Configuración de puerto dinámica para Render
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
+
+# Fin del archivo
