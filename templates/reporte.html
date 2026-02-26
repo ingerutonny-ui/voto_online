@@ -4,46 +4,103 @@
     <meta charset="UTF-8">
     <title>MONITOREO DE TENDENCIAS</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --dark: #000; --grey-light: #f4f4f4; --grey-border: #ddd; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; margin: 0; padding: 30px; color: #000; }
         
-        /* ENCABEZADO */
         .header-reporte { text-align: center; border-bottom: 4px solid var(--dark); padding-bottom: 20px; margin-bottom: 40px; }
         h1 { text-transform: uppercase; font-weight: 900; margin: 0; font-size: 2rem; letter-spacing: 2px; }
         .sub { font-weight: 900; font-size: 0.9rem; margin-top: 10px; text-transform: uppercase; color: #444; }
 
-        /* SECCIONES POR CIUDAD */
         .ciudad-section { margin-bottom: 60px; page-break-inside: avoid; }
-        .ciudad-header { 
-            background: var(--grey-light); 
-            padding: 15px 25px; 
-            border-left: 12px solid var(--dark); 
-            margin-bottom: 20px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
+        .ciudad-header { background: var(--grey-light); padding: 15px 25px; border-left: 12px solid var(--dark); margin-bottom: 20px; }
         .ciudad-title { font-size: 1.6rem; font-weight: 900; text-transform: uppercase; margin: 0; }
 
-        /* TABLA ESTILO LIMPIO */
-        .table-container { width: 100%; overflow-x: auto; }
+        /* CONTENEDOR DEL GRÁFICO */
+        .chart-container { width: 100%; max-width: 800px; margin: 20px auto 40px; background: #fff; padding: 20px; border: 1px solid #eee; }
+
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th { background: #eee; color: #000; padding: 15px; text-align: left; text-transform: uppercase; font-size: 0.85rem; border-bottom: 2px solid var(--dark); }
         td { padding: 15px; border-bottom: 1px solid var(--grey-border); font-size: 1rem; }
-        
-        /* DIFERENCIACIÓN DE FILAS */
         tr:nth-child(even) { background: #fafafa; }
-        .votos-count { font-weight: 900; font-size: 1.3rem; text-align: right; color: var(--dark); }
+        .votos-count { font-weight: 900; font-size: 1.3rem; text-align: right; }
 
-        /* BOTÓN IMPRESIÓN */
-        .btn-pdf { 
-            display: block; width: 100%; max-width: 300px; margin: 50px auto; 
-            padding: 20px; background: var(--dark); color: #fff; text-align: center; 
-            text-decoration: none; font-weight: 900; border-radius: 15px; 
-            text-transform: uppercase; font-size: 1rem; cursor: pointer; border: none;
-        }
+        .btn-pdf { display: block; width: 100%; max-width: 300px; margin: 50px auto; padding: 20px; background: var(--dark); color: #fff; text-align: center; text-decoration: none; font-weight: 900; border-radius: 15px; text-transform: uppercase; cursor: pointer; }
 
-        /* AJUSTES PARA IMPRESIÓN PDF */
         @media print { 
-            .btn-pdf { display
+            .btn-pdf { display: none; } 
+            .chart-container { border: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-reporte">
+        <h1>MONITOREO DE TENDENCIAS</h1>
+        <div class="sub">REPORTE OFICIAL DE CONSULTA CIUDADANA</div>
+    </div>
+
+    {% for ciudad, partidos in resultados.items() %}
+    <div class="ciudad-section">
+        <div class="ciudad-header">
+            <h2 class="ciudad-title">CIUDAD: {{ ciudad }}</h2>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="chart-{{ ciudad }}"></canvas>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>PARTIDO / SIGLA</th>
+                    <th>CANDIDATO</th>
+                    <th style="text-align: right;">VOTOS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in partidos %}
+                <tr>
+                    <td style="font-weight: 900;">{{ p.nombre }}</td>
+                    <td style="text-transform: uppercase;">{{ p.alcalde }}</td>
+                    <td class="votos-count">{{ p.votos }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        (function() {
+            const ctx = document.getElementById('chart-{{ ciudad }}').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [{% for p in partidos %}"{{ p.nombre }}",{% endfor %}],
+                    datasets: [{
+                        label: 'Votos por Partido',
+                        data: [{% for p in partidos %}{{ p.votos }},{% endfor %}],
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        borderColor: '#000',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        })();
+    </script>
+    {% endfor %}
+
+    <button onclick="window.print()" class="btn-pdf">IMPRIMIR REPORTE (PDF)</button>
+
+</body>
+</html>
