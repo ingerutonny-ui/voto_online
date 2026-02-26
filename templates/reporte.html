@@ -5,40 +5,41 @@
     <title>Reporte de Votación</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
-        .barra-voto { height: 20px; background-color: #0d6efd; border-radius: 4px; transition: width 0.5s; }
-        @media print { .no-print { display: none; } }
+        .barra-voto { height: 24px; background-color: #0d6efd; border-radius: 4px; min-width: 2px; }
+        .tabla-reporte td { vertical-align: middle; }
+        @media print { .no-print { display: none; } #bloque-reporte { width: 100%; margin: 0; } }
     </style>
 </head>
 <body class="bg-light">
-    <div class="container mt-4" id="seccion-reporte">
+    <div class="container mt-4" id="bloque-reporte">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold">RESULTADOS OFICIALES</h2>
-            <button onclick="window.print()" class="btn btn-danger no-print">IMPRIMIR / PDF</button>
+            <h2 class="fw-bold">RESULTADOS DE VOTACIÓN</h2>
+            <button onclick="window.print()" class="btn btn-danger no-print">DESCARGAR PDF / IMPRIMIR</button>
         </div>
 
         {% for ciudad, partidos in resultados.items() %}
         <div class="card mb-5 shadow-sm">
             <div class="card-header bg-dark text-white d-flex justify-content-between">
                 <span class="h5 mb-0">{{ ciudad }}</span>
-                <span class="h5 mb-0">VOTOS TOTALES: {{ totales[ciudad] }}</span>
+                <span class="h5 mb-0">TOTAL VOTOS: {{ totales[ciudad] }}</span>
             </div>
-            <div class="card-body">
-                <table class="table table-borderless align-middle">
-                    <thead class="table-light">
+            <div class="card-body p-0">
+                <table class="table table-hover tabla-reporte mb-0">
+                    <thead class="table-secondary">
                         <tr>
                             <th style="width: 20%">Partido</th>
-                            <th style="width: 65%">Visualización de Votos</th>
-                            <th style="width: 15%" class="text-center">Cantidad</th>
+                            <th style="width: 65%">Gráfica de Votos (Enteros)</th>
+                            <th style="width: 15%" class="text-center">Votos</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for p in partidos %}
                         <tr>
-                            <td class="fw-bold">{{ p.nombre }}</td>
+                            <td class="ps-3"><strong>{{ p.nombre }}</strong><br><small class="text-muted">{{ p.alcalde }}</small></td>
                             <td>
                                 {% if totales[ciudad] > 0 %}
-                                    {% set porcentaje = (p.votos / totales[ciudad]) * 100 %}
-                                    <div class="barra-voto" style="width: {{ porcentaje }}%;"></div>
+                                    {% set ancho = (p.votos / totales[ciudad]) * 100 %}
+                                    <div class="barra-voto" style="width: {{ ancho }}%;"></div>
                                 {% else %}
                                     <div class="barra-voto" style="width: 0%;"></div>
                                 {% endif %}
