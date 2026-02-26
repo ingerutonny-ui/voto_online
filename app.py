@@ -73,7 +73,9 @@ partidos_lapaz = [
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    msg_type = request.args.get('msg_type')
+    ci_votante = request.args.get('ci')
+    return render_template('index.html', msg_type=msg_type, ci_votante=ci_votante)
 
 @app.route('/votar/<ciudad>')
 def votar(ciudad):
@@ -91,31 +93,44 @@ def confirmar_voto():
         if cur.fetchone():
             cur.close()
             conn.close()
-            return render_template('error.html', ci=ci)
+            return redirect(url_for('index', msg_type='error', ci=ci))
+        
         cur.execute('''INSERT INTO votos (ci, nombres, apellido, edad, genero, celular, partido_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)''', (ci, request.form.get('nombres').upper(), 
-            request.form.get('apellido').upper(), request.form.get('edad'), request.form.get('genero'),
-            request.form.get('celular'), request.form.get('partido_id')))
+            VALUES (%s, %s, %s, %s, %s, %s, %s)''', (
+            ci, request.form.get('nombres').upper(), request.form.get('apellido').upper(), 
+            request.form.get('edad'), request.form.get('genero'),
+            request.form.get('celular'), request.form.get('partid_id') # Se usa partido_id del form
+        ))
         conn.commit()
         cur.close()
         conn.close()
-        return render_template('exito.html', ci=ci)
+        return redirect(url_for('index', msg_type='success', ci=ci))
     except Exception as e:
         return f"Error Crítico: {str(e)}", 500
 
 @app.route('/reporte')
 def reporte():
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute('SELECT partido_id, COUNT(*) FROM votos GROUP BY partido_id')
-    conteos = dict(cur.fetchall())
-    cur.close()
-    conn.close()
-    todos = partidos_oruro + partidos_lapaz
-    for p in todos:
-        p['votos'] = conteos.get(p['id'], 0)
-    return render_template('reporte.html', partidos=todos)
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute('SELECT partido_id, COUNT(*) FROM votos GROUP BY partido_id')
+        conteos = dict(cur.fetchall())
+        cur.close()
+        conn.close()
+
+        # Mapeo de votos para cada lista
+        for p in partidos_oruro: p['votos'] = conteos.get(p['id'], 0)
+        for p in partidos_lapaz: p['votos'] = conteos.get(p['id'], 0)
+
+        # Estructura requerida por reporte.html
+        resultados = {
+            "ORURO": partidos_oruro,
+            "LA PAZ": partidos_lapaz
+        }
+        return render_template('reporte.html', resultados=resultados)
+    except Exception as e:
+        return f"Error en Reporte: {str(e)}", 500
 
 if __name__ == '__main__':
-    init_db()
+    init_db() # Crea la tabla al arrancar
     app.run()
