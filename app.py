@@ -5,12 +5,9 @@ from flask import Flask, render_template, request, redirect, url_for
 app = Flask(__name__)
 
 def get_db_connection():
-    # Conexión persistente a PostgreSQL en Render usando la variable de entorno
-    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
-    return conn
+    return psycopg2.connect(os.environ.get('DATABASE_URL'))
 
 def init_db():
-    # Esta función crea la tabla 'votos' si no existe, solucionando el Error Crítico
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute('''
@@ -29,7 +26,9 @@ def init_db():
     cur.close()
     conn.close()
 
-# LISTA DE CANDIDATOS - ORURO
+# ESTA LÍNEA ES LA SOLUCIÓN: Ejecuta la creación de tabla al cargar el módulo en Render
+init_db()
+
 partidos_oruro = [
     {"id": 1, "nombre": "MTS", "alcalde": "OLIVER OSCAR POMA CARTAGENA"},
     {"id": 2, "nombre": "PATRIA ORURO", "alcalde": "RAFAEL VARGAS VILLEGAS"},
@@ -50,7 +49,6 @@ partidos_oruro = [
     {"id": 17, "nombre": "UNSOL", "alcalde": "ESTEBAN MAMANI"}
 ]
 
-# LISTA DE CANDIDATOS - LA PAZ
 partidos_lapaz = [
     {"id": 101, "nombre": "SOBERANÍA", "alcalde": "FELIPE QUISPE"},
     {"id": 102, "nombre": "SOL.BO", "alcalde": "ALVARO BLONDEL"},
@@ -73,7 +71,6 @@ partidos_lapaz = [
 
 @app.route('/')
 def index():
-    # Captura parámetros para mostrar overlays azul/rojo en index.html
     msg_type = request.args.get('msg_type')
     ci_votante = request.args.get('ci')
     return render_template('index.html', msg_type=msg_type, ci_votante=ci_votante)
@@ -90,30 +87,21 @@ def confirmar_voto():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        
-        # Validar si el CI ya existe en la BD real
         cur.execute('SELECT ci FROM votos WHERE ci = %s', (ci,))
         if cur.fetchone():
             cur.close()
             conn.close()
-            # Si existe, manda al index con ventana roja
             return redirect(url_for('index', msg_type='error', ci=ci))
         
-        # Inserción con todos los campos P1, P2 y P3 mapeados
         cur.execute('''INSERT INTO votos (ci, nombres, apellido, edad, genero, celular, partido_id)
             VALUES (%s, %s, %s, %s, %s, %s, %s)''', (
-            ci, 
-            request.form.get('nombres').upper(), 
-            request.form.get('apellido').upper(), 
-            request.form.get('edad'), 
-            request.form.get('genero'),
-            request.form.get('celular'), 
-            request.form.get('partido_id')
+            ci, request.form.get('nombres').upper(), request.form.get('apellido').upper(), 
+            request.form.get('edad'), request.form.get('genero'),
+            request.form.get('celular'), request.form.get('partido_id')
         ))
         conn.commit()
         cur.close()
         conn.close()
-        # Si tiene éxito, manda al index con ventana azul
         return redirect(url_for('index', msg_type='success', ci=ci))
     except Exception as e:
         return f"Error Crítico: {str(e)}", 500
@@ -128,19 +116,13 @@ def reporte():
         cur.close()
         conn.close()
 
-        # Asignar conteos a las listas originales
         for p in partidos_oruro: p['votos'] = conteos.get(p['id'], 0)
         for p in partidos_lapaz: p['votos'] = conteos.get(p['id'], 0)
 
-        # Estructura de diccionario para el bucle en reporte.html
-        resultados = {
-            "ORURO": partidos_oruro,
-            "LA PAZ": partidos_lapaz
-        }
+        resultados = {"ORURO": partidos_oruro, "LA PAZ": partidos_lapaz}
         return render_template('reporte.html', resultados=resultados)
     except Exception as e:
         return f"Error en Reporte: {str(e)}", 500
 
 if __name__ == '__main__':
-    init_db() # Crea la tabla al arrancar el servidor
     app.run()
