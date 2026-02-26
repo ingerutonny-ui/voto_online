@@ -5,12 +5,12 @@
     <title>SISTEMA DE VOTACIÓN {{ ciudad }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        :root { --dark: #1a1a1a; --soft-bg: #f4f7f6; --border: #e1e4e8; }
+        :root { --dark: #1a1a1a; --soft-bg: #f4f7f6; --border: #e1e4e8; --gris-suave: #e0e0e0; }
         body { font-family: 'Segoe UI', sans-serif; background: #ffffff; margin: 0; padding: 20px; color: var(--dark); }
         header { text-align: center; border-bottom: 2px solid var(--dark); padding-bottom: 20px; margin-bottom: 30px; }
         h1 { text-transform: uppercase; font-weight: 900; }
 
-        /* REJILLA 3X5 */
+        /* REJILLA 3X5 SEGÚN CAPTURA */
         .grid-candidatos { 
             display: grid; 
             grid-template-columns: repeat(3, 1fr); 
@@ -35,21 +35,20 @@
         .form-voto { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
         input, select { padding: 15px; border: 1px solid var(--border); border-radius: 10px; font-size: 1rem; background: var(--soft-bg); width: 100%; box-sizing: border-box; }
 
-        /* BOTÓN VOTAR */
+        /* BOTÓN VOTAR GRIS SUAVE */
         .btn-enviar-voto { 
-            background: var(--dark); color: #fff; padding: 18px; border: none; 
+            background: var(--gris-suave); color: #333; padding: 18px; border: none; 
             border-radius: 12px; font-weight: 800; font-size: 1.1rem; 
-            cursor: pointer; text-transform: uppercase; margin-top: 10px;
+            cursor: pointer; text-transform: uppercase; margin-top: 10px; transition: 0.3s;
         }
+        .btn-enviar-voto:hover { background: #d0d0d0; }
         
         .cerrar-modal { margin-top: 15px; color: #999; cursor: pointer; font-size: 0.8rem; font-weight: 700; text-align: center; display: block; text-decoration: underline; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>CIUDAD: {{ ciudad }}</h1>
-    </header>
+    <header><h1>CIUDAD: {{ ciudad }}</h1></header>
 
     <div class="grid-candidatos">
         {% for p in partidos %}
@@ -63,16 +62,11 @@
     <div id="modalVoto" class="modal">
         <div class="modal-content">
             <h2 id="partido-titulo" style="margin: 0; font-weight: 900; text-align: center;"></h2>
-            <p style="text-align: center; font-size: 0.8rem; color: #666;">REGISTRE SUS DATOS COMPLETOS</p>
-            
             <form action="/confirmar_voto" method="POST" class="form-voto">
                 <input type="hidden" name="partido_id" id="partido_id_input">
-                
                 <input type="text" name="ci" placeholder="CÉDULA DE IDENTIDAD" required>
-                
                 <input type="text" name="nombres" placeholder="NOMBRES" required oninput="this.value = this.value.toUpperCase()">
                 <input type="text" name="apellido" placeholder="APELLIDOS" required oninput="this.value = this.value.toUpperCase()">
-                
                 <div style="display: flex; gap: 10px;">
                     <input type="number" name="edad" placeholder="EDAD" required min="18" style="flex: 1;">
                     <select name="genero" required style="flex: 1.5;">
@@ -81,9 +75,7 @@
                         <option value="FEMENINO">FEMENINO</option>
                     </select>
                 </div>
-                
                 <input type="text" name="celular" placeholder="CELULAR" required>
-                
                 <button type="submit" class="btn-enviar-voto">VOTAR</button>
                 <div class="cerrar-modal" onclick="cerrarRegistro()">CANCELAR</div>
             </form>
@@ -96,10 +88,7 @@
             document.getElementById('partido-titulo').innerText = nombre;
             document.getElementById('modalVoto').style.display = 'flex';
         }
-        function cerrarRegistro() {
-            document.getElementById('modalVoto').style.display = 'none';
-        }
+        function cerrarRegistro() { document.getElementById('modalVoto').style.display = 'none'; }
     </script>
-
 </body>
 </html>
