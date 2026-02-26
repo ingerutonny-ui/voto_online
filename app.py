@@ -28,10 +28,9 @@ def init_db():
 
 init_db()
 
-def obtener_partidos_oficiales(ciudad):
+def obtener_partidos(ciudad):
     es_lp = "LA PAZ" in ciudad.upper()
     offset = 100 if es_lp else 0
-    # Candidatos según papeleta oficial
     return [
         {"id": 1 + offset, "nombre": "FRI", "alcalde": "CANDIDATO FRI"},
         {"id": 2 + offset, "nombre": "LODEL", "alcalde": "CANDIDATO LODEL"},
@@ -57,7 +56,7 @@ def index():
 @app.route('/votar/<ciudad>')
 def votar(ciudad):
     c_nom = ciudad.upper().replace("_", " ")
-    return render_template('votar.html', ciudad=c_nom, partidos=obtener_partidos_oficiales(c_nom))
+    return render_template('votar.html', ciudad=c_nom, partidos=obtener_partidos(c_nom))
 
 @app.route('/confirmar_voto', methods=['POST'])
 def confirmar_voto():
@@ -77,21 +76,23 @@ def confirmar_voto():
 
 @app.route('/reporte')
 def reporte():
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute('SELECT partido_id, COUNT(*) FROM votos GROUP BY partido_id')
-        conteos = dict(cur.fetchall())
-        cur.close()
-        conn.close()
-        res = {}
-        for c in ["ORURO", "LA PAZ"]:
-            lista = obtener_partidos_oficiales(c)
-            for p in lista: p['votos'] = conteos.get(p['id'], 0)
-            res[c] = lista
-        return render_template('reporte.html', resultados=res)
-    except Exception as e:
-        return f"Error: {str(e)}", 500
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('SELECT partido_id, COUNT(*) FROM votos GROUP BY partido_id')
+    conteos = dict(cur.fetchall())
+    cur.close()
+    conn.close()
+    res = {}
+    totales = {}
+    for ciudad in ["ORURO", "LA PAZ"]:
+        lista = obtener_partidos(ciudad)
+        suma = 0
+        for p in lista:
+            p['votos'] = conteos.get(p['id'], 0)
+            suma += p['votos']
+        res[ciudad] = lista
+        totales[ciudad] = suma
+    return render_template('reporte.html', resultados=res, totales=totales)
 
 if __name__ == '__main__':
     app.run()
