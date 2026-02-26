@@ -2,109 +2,87 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>REPORTE BARRAS - CONSULTA CIUDADANA</title>
+    <title>MONITOREO DE TENDENCIAS</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
     <style>
-        :root { --accent: #d90429; --card-bg: rgba(255, 255, 255, 0.03); }
-        body {
-            background: radial-gradient(circle at top, #2b0000 0%, #000000 100%);
-            color: white; font-family: sans-serif; margin: 0; padding: 40px 20px;
-        }
-        .container { max-width: 900px; margin: 0 auto; }
-        header { text-align: center; margin-bottom: 30px; }
-        .chart-container {
-            background: var(--card-bg); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
-            padding: 20px; margin-bottom: 30px; height: 400px;
-        }
-        .tabla-container {
-            background: var(--card-bg); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
-            overflow: hidden;
-        }
-        table { width: 100%; border-collapse: collapse; }
-        th { padding: 15px; color: var(--accent); border-bottom: 1px solid rgba(217,4,41,0.3); text-align: left; }
-        td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .votos-badge { background: var(--accent); padding: 5px 12px; border-radius: 50px; font-weight: bold; }
-        .controls { text-align: center; margin-top: 30px; display: flex; gap: 20px; justify-content: center; }
-        .btn { padding: 12px 25px; border-radius: 8px; text-decoration: none; cursor: pointer; border: none; font-weight: bold; }
-        .btn-pdf { background: #27ae60; color: white; }
-        .btn-inicio { background: #444; color: white; }
+        :root { --accent: #d90429; }
+        body { background: #000; color: white; font-family: sans-serif; padding: 20px; }
+        .reporte-wrap { max-width: 900px; margin: auto; background: white; color: black; padding: 40px; border-radius: 10px; }
+        .header { text-align: center; border-bottom: 2px solid var(--accent); margin-bottom: 30px; padding-bottom: 10px; }
+        h2 { color: var(--accent); text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9rem; }
+        th { background: #f2f2f2; padding: 10px; border: 1px solid #ddd; text-align: left; }
+        td { padding: 8px; border: 1px solid #ddd; }
+        
+        /* Estilo Cebra */
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        
+        .page-break { page-break-before: always; margin-top: 50px; }
+        .btn-float { position: fixed; bottom: 20px; right: 20px; background: #27ae60; color: white; padding: 15px; border-radius: 50px; text-decoration: none; font-weight: bold; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="container" id="reporte-pdf">
-        <header>
-            <h1>ESTADÍSTICAS DE VOTACIÓN</h1>
-            <div style="width:60px; height:3px; background:var(--accent); margin:10px auto;"></div>
-        </header>
-
-        <div class="chart-container">
-            <canvas id="barChart"></canvas>
+<div id="capture">
+    <div class="reporte-wrap">
+        <div class="header">
+            <h1>REPORTE ELECTORAL - ORURO</h1>
+            <p>Proyecto: HISTORIAL_CLINICO_NUBE</p>
         </div>
+        <canvas id="chartOruro" width="400" height="150"></canvas>
+        <table>
+            <thead><tr><th>Sigla</th><th>Candidato</th><th>Votos</th></tr></thead>
+            <tbody>
+                {% for r in res_oruro %}
+                <tr><td>{{ r.nombre }}</td><td>{{ r.alcalde }}</td><td><strong>{{ r.total }}</strong></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-        <div class="tabla-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Ciudad</th>
-                        <th>Candidato</th>
-                        <th style="text-align: right;">Votos</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for r in resultados %}
-                    <tr>
-                        <td>{{ r.ciudad }}</td>
-                        <td><strong>{{ r.nombre }}</strong></td>
-                        <td style="text-align: right;"><span class="votos-badge">{{ r.total }}</span></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="page-break"></div>
+
+        <div class="header">
+            <h1>REPORTE ELECTORAL - LA PAZ</h1>
         </div>
+        <canvas id="chartLaPaz" width="400" height="150"></canvas>
+        <table>
+            <thead><tr><th>Sigla</th><th>Candidato</th><th>Votos</th></tr></thead>
+            <tbody>
+                {% for r in res_lapaz %}
+                <tr><td>{{ r.nombre }}</td><td>{{ r.alcalde }}</td><td><strong>{{ r.total }}</strong></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+</div>
 
-    <div class="controls">
-        <button onclick="descargarPDF()" class="btn btn-pdf">DESCARGAR PDF</button>
-        <a href="/" class="btn btn-inicio">VOLVER</a>
-    </div>
+<button class="btn-float" onclick="descargar()">DESCARGAR REPORTE PDF</button>
 
-    <script>
-        const ctx = document.getElementById('barChart').getContext('2d');
-        new Chart(ctx, {
+<script>
+    function crearGrafico(id, labels, data) {
+        new Chart(document.getElementById(id), {
             type: 'bar',
             data: {
-                labels: [{% for r in resultados %}"{{ r.nombre }}",{% endfor %}],
-                datasets: [{
-                    label: 'Votos Totales',
-                    data: [{% for r in resultados %}{{ r.total }},{% endfor %}],
-                    backgroundColor: '#d90429',
-                    borderRadius: 5
-                }]
+                labels: labels,
+                datasets: [{ label: 'Votos', data: data, backgroundColor: '#d90429' }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: 'white' } },
-                    x: { ticks: { color: 'white' } }
-                },
-                plugins: { legend: { display: false } }
-            }
+            options: { scales: { y: { beginAtZero: true } } }
         });
+    }
 
-        function descargarPDF() {
-            const element = document.getElementById('reporte-pdf');
-            html2pdf().set({
-                margin: 1,
-                filename: 'Reporte_Barras_Nancy.pdf',
-                html2canvas: { scale: 2, backgroundColor: '#050505' },
-                jsPDF: { unit: 'cm', format: 'letter', orientation: 'portrait' }
-            }).from(element).save();
-        }
-    </script>
+    crearGrafico('chartOruro', [{% for r in res_oruro %}"{{ r.nombre }}",{% endfor %}], [{% for r in res_oruro %}{{ r.total }},{% endfor %}]);
+    crearGrafico('chartLaPaz', [{% for r in res_lapaz %}"{{ r.nombre }}",{% endfor %}], [{% for r in res_lapaz %}{{ r.total }},{% endfor %}]);
+
+    function descargar() {
+        const element = document.getElementById('capture');
+        html2pdf().set({
+            margin: 0.5,
+            filename: 'Reporte_Tendencias_2026.pdf',
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        }).from(element).save();
+    }
+</script>
 </body>
 </html>
