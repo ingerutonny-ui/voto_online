@@ -1,128 +1,83 @@
-import os
 from flask import Flask, render_template, request, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
+import os
 
 app = Flask(__name__)
-# Se mantiene la clave secreta técnica
-app.secret_key = 'consulta_ciudadana_2026_oficial'
 
-# Configuración de Base de Datos para Render
-uri = os.environ.get('DATABASE_URL')
-if uri and uri.startswith("postgres://"):
-    uri = uri.replace("postgres://", "postgresql://", 1)
+# BASE DE DATOS DE CANDIDATOS COMPLETA
+partidos = [
+    {"id": 1, "nombre": "MTS", "alcalde": "OLIVER OSCAR POMA CARTAGENA", "ciudad": "ORURO", "votos": 0},
+    {"id": 2, "nombre": "PATRIA ORURO", "alcalde": "RAFAEL VARGAS VILLEGAS", "ciudad": "ORURO", "votos": 0},
+    {"id": 3, "nombre": "LIBRE", "alcalde": "RENE BENJAMIN GUZMAN VARGAS", "ciudad": "ORURO", "votos": 0},
+    {"id": 4, "nombre": "PP", "alcalde": "CARLOS AGUILAR", "ciudad": "ORURO", "votos": 0},
+    {"id": 5, "nombre": "SOMOS ORURO", "alcalde": "MARCELO CORTEZ GUTIERREZ", "ciudad": "ORURO", "votos": 0},
+    {"id": 6, "nombre": "JACHA", "alcalde": "MARCELO FERNANDO MEDINA CENTELLAS", "ciudad": "ORURO", "votos": 0},
+    {"id": 7, "nombre": "SOL.BO", "alcalde": "MARCELO MEDINA", "ciudad": "ORURO", "votos": 0},
+    {"id": 8, "nombre": "UN", "alcalde": "SAMUEL DORIA MEDINA", "ciudad": "LA PAZ", "votos": 0},
+    {"id": 9, "nombre": "MAS", "alcalde": "CANDIDATO LA PAZ", "ciudad": "LA PAZ", "votos": 0}
+]
 
-app.config['SQLALCHEMY_DATABASE_URI'] = uri or 'sqlite:///local.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db = SQLAlchemy(app)
-
-# MODELOS (Integridad total del Backend)
-class Partido(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(100))
-    alcalde = db.Column(db.String(100))
-    ciudad = db.Column(db.String(50))
-
-class Voto(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    ci = db.Column(db.String(30), unique=True, nullable=False)
-    nombres = db.Column(db.String(100), nullable=False)
-    apellido = db.Column(db.String(100), nullable=False)
-    celular = db.Column(db.String(20), nullable=False)
-    genero = db.Column(db.String(20), nullable=False)
-    edad = db.Column(db.Integer, nullable=False)
-    partido_id = db.Column(db.Integer, db.ForeignKey('partido.id'), nullable=False)
-
-def restaurar_datos():
-    db.create_all()
-    data = [
-        # ORURO (P1 al P15)
-        {'n': 'FRI', 'a': 'RENE ROBERTO MAMANI LLAVE', 'c': 'ORURO'},
-        {'n': 'LEAL', 'a': 'ADEMAR WILLCARANI MORALES', 'c': 'ORURO'},
-        {'n': 'NGP', 'a': 'IVÁN QUISPE GUTIÉRREZ', 'c': 'ORURO'},
-        {'n': 'AORA', 'a': 'SANTIAGO CONDORI APAZA', 'c': 'ORURO'},
-        {'n': 'UN', 'a': 'ENRIQUE FERNANDO URQUIDI DAZA', 'c': 'ORURO'},
-        {'n': 'AUPP', 'a': 'JUAN CARLOS CHOQUE ZUBIETA', 'c': 'ORURO'},
-        {'n': 'UCS', 'a': 'LINO MARCOS MAIN ADRIÁN', 'c': 'ORURO'},
-        {'n': 'SUMATE', 'a': 'OSCAR MIGUEL TOCO CHOQUE', 'c': 'ORURO'},
-        {'n': 'MTS', 'a': 'OLIVER OSCAR POMA CARTAGENA', 'c': 'ORURO'},
-        {'n': 'PATRIA ORURO', 'a': 'RAFAEL VARGAS VILLEGAS', 'c': 'ORURO'},
-        {'n': 'LIBRE', 'a': 'RENE BENJAMIN GUZMAN VARGAS', 'c': 'ORURO'},
-        {'n': 'PP', 'a': 'CARLOS AGUILAR', 'c': 'ORURO'},
-        {'n': 'SOMOS ORURO', 'a': 'MARCELO CORTEZ GUTIÉRREZ', 'c': 'ORURO'},
-        {'n': 'JACHA', 'a': 'MARCELO FERNANDO MEDINA CENTELLAS', 'c': 'ORURO'},
-        {'n': 'SOL.BO', 'a': 'MARCELO MEDINA', 'c': 'ORURO'},
-        # LA PAZ (17 Candidatos)
-        {'n': 'JALLALLA', 'a': 'SANTOS QUISPE', 'c': 'LA PAZ'},
-        {'n': 'ASP', 'a': 'XAVIER ITURRALDE', 'c': 'LA PAZ'},
-        {'n': 'VENCEREMOS', 'a': 'WALDO ALBARRACIN', 'c': 'LA PAZ'},
-        {'n': 'SOMOS LA PAZ', 'a': 'MIGUEL ROCA', 'c': 'LA PAZ'},
-        {'n': 'UPC', 'a': 'LUIS EDUARDO SILES', 'c': 'LA PAZ'},
-        {'n': 'LIBRE', 'a': 'CARLOS CORDERO', 'c': 'LA PAZ'},
-        {'n': 'MTS', 'a': 'FELIX PATZI', 'c': 'LA PAZ'},
-        {'n': 'PAN-BOL', 'a': 'AMILCAR BARRAL', 'c': 'LA PAZ'},
-        {'n': 'SOL.BO', 'a': 'ALVARO BLONDEL', 'c': 'LA PAZ'},
-        {'n': 'UNIDOS', 'a': 'PEDRO SUSZ', 'c': 'LA PAZ'},
-        {'n': 'UCS', 'a': 'PETER MALDONADO', 'c': 'LA PAZ'},
-        {'n': 'MAS-IPSP', 'a': 'CESAR DOCKWEILER', 'c': 'LA PAZ'},
-        {'n': 'PBCSP', 'a': 'IVAN ARIAS', 'c': 'LA PAZ'},
-        {'n': 'FPLP', 'a': 'FEDERICO ESCOBAR', 'c': 'LA PAZ'},
-        {'n': 'CC-A', 'a': 'RONALD MACLEAN', 'c': 'LA PAZ'},
-        {'n': 'MNR', 'a': 'JOSE MANUEL ENCINAS', 'c': 'LA PAZ'},
-        {'n': 'APG', 'a': 'GUSTAVO BEJARANO', 'c': 'LA PAZ'}
-    ]
-    for p in data:
-        if not Partido.query.filter_by(nombre=p['n'], ciudad=p['c']).first():
-            db.session.add(Partido(nombre=p['n'], alcalde=p['a'], ciudad=p['c']))
-    db.session.commit()
+# Registro de votos para evitar duplicados por CI
+votos_registrados = []
 
 @app.route('/')
 def index():
-    restaurar_datos()
-    return render_template('index.html')
+    msg_type = request.args.get('msg_type')
+    ci_votante = request.args.get('ci')
+    return render_template('index.html', msg_type=msg_type, ci_votante=ci_votante)
 
 @app.route('/votar/<ciudad>')
 def votar(ciudad):
-    restaurar_datos()
-    partidos = Partido.query.filter_by(ciudad=ciudad.upper()).all()
-    return render_template('votar.html', ciudad=ciudad.upper(), partidos=partidos)
+    # Filtra candidatos por la ciudad seleccionada
+    partidos_ciudad = [p for p in partidos if p['ciudad'] == ciudad]
+    return render_template('votar.html', ciudad=ciudad, partidos=partidos_ciudad)
 
 @app.route('/confirmar_voto', methods=['POST'])
 def confirmar_voto():
-    ci_f = request.form.get('ci', '').strip().upper()
-    if Voto.query.filter_by(ci=ci_f).first():
-        return render_template('index.html', msg_type="error", ci_votante=ci_f)
-    try:
-        nuevo_voto = Voto(
-            ci=ci_f,
-            nombres=request.form.get('nombres', '').upper(),
-            apellido=request.form.get('apellido', '').upper(),
-            celular=request.form.get('celular'),
-            genero=request.form.get('genero'),
-            edad=int(request.form.get('edad')),
-            partido_id=int(request.form.get('partido_id'))
-        )
-        db.session.add(nuevo_voto)
-        db.session.commit()
-        return render_template('index.html', msg_type="success", ci_votante=ci_f)
-    except Exception as e:
-        db.session.rollback()
-        return redirect(url_for('index'))
+    # Captura de datos del formulario
+    ci = request.form.get('ci').strip()
+    partido_id = int(request.form.get('partido_id'))
+    
+    # VALIDACIÓN: Si el CI ya existe en la lista de votos_registrados
+    if any(voto['ci'] == ci for voto in votos_registrados):
+        # Redirige al index con el mensaje de error y el CI duplicado
+        return redirect(url_for('index', msg_type='error', ci=ci))
+    
+    # Si es nuevo, se registra el voto
+    nuevo_voto = {
+        'ci': ci,
+        'nombres': request.form.get('nombres').upper(),
+        'apellido': request.form.get('apellido').upper(),
+        'partido_id': partido_id
+    }
+    votos_registrados.append(nuevo_voto)
+    
+    # Sumar el voto al contador del partido correspondiente
+    for p in partidos:
+        if p['id'] == partido_id:
+            p['votos'] += 1
+            break
+            
+    # Redirige al index con mensaje de éxito
+    return redirect(url_for('index', msg_type='success', ci=ci))
 
 @app.route('/reporte')
 def reporte():
-    # Consulta de votos para el reporte (PROYECTO EN LA NUBE)
-    res_oruro = db.session.query(
-        Partido.nombre, Partido.alcalde, db.func.count(Voto.id).label('total')
-    ).outerjoin(Voto).filter(Partido.ciudad == 'ORURO').group_by(Partido.id).all()
+    # Organiza los resultados por ciudad para el template reporte.html
+    resultados = {}
+    ciudades = sorted(list(set(p['ciudad'] for p in partidos)))
     
-    res_lapaz = db.session.query(
-        Partido.nombre, Partido.alcalde, db.func.count(Voto.id).label('total')
-    ).outerjoin(Voto).filter(Partido.ciudad == 'LA PAZ').group_by(Partido.id).all()
-
-    return render_template('reporte.html', res_oruro=res_oruro, res_lapaz=res_lapaz)
+    for ciudad in ciudades:
+        # Ordena de mayor a menor votación
+        partidos_ordenados = sorted(
+            [p for p in partidos if p['ciudad'] == ciudad],
+            key=lambda x: x['votos'],
+            reverse=True
+        )
+        resultados[ciudad] = partidos_ordenados
+        
+    return render_template('reporte.html', resultados=resultados)
 
 if __name__ == '__main__':
-    with app.app_context():
-        restaurar_datos()
-    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
+    # Configuración para Render o ejecución local
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
