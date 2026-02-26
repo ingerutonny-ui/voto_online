@@ -8,78 +8,68 @@
     <style>
         :root { --dark: #000; --grey-light: #f4f4f4; --grey-border: #ddd; }
         
-        /* ELIMINACIÓN TOTAL DE MÁRGENES FÍSICOS */
-        @page { size: auto; margin: 0mm; } 
+        /* RESET RADICAL DE PÁGINA */
+        @page { size: letter; margin: 0; } 
         
         html, body { 
             margin: 0 !important; 
             padding: 0 !important; 
             width: 100%;
-            height: auto;
-            overflow-x: hidden;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; color: #000; }
 
-        /* Contenedor con posicionamiento relativo para control absoluto interno */
+        /* Contenedor principal con márgenes internos solo para el contenido */
         .wrapper-reporte { 
-            position: relative;
-            width: 100%;
-            padding: 0;
-            margin: 0;
+            padding: 10mm 15mm;
+            display: block;
         }
         
-        /* ENCABEZADO: Posicionamiento que no ocupa espacio en el flujo */
+        /* ENCABEZADO: Reducido para que no ocupe más de 1.5cm */
         .header-reporte { 
             text-align: center; 
-            border-bottom: 4px solid var(--dark); 
-            padding: 20px 0;
-            margin: 0 auto 30px auto;
-            width: 90%;
-            /* Evita que el navegador cree saltos antes de este bloque */
-            break-before: avoid;
-            page-break-before: avoid;
+            border-bottom: 3px solid var(--dark); 
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            page-break-after: avoid;
         }
 
-        h1 { text-transform: uppercase; font-weight: 900; margin: 0; font-size: 1.8rem; letter-spacing: 2px; }
-        .sub { font-weight: 900; font-size: 0.8rem; margin-top: 5px; text-transform: uppercase; color: #444; }
+        h1 { text-transform: uppercase; font-weight: 900; margin: 0; font-size: 1.6rem; letter-spacing: 1px; }
+        .sub { font-weight: 900; font-size: 0.75rem; margin-top: 3px; text-transform: uppercase; color: #555; }
 
-        /* SECCIONES: Control estricto de saltos */
+        /* SECCIONES: Evitamos que se corten a la mitad */
         .ciudad-section { 
-            width: 90%; 
-            margin: 0 auto 50px auto; 
-            page-break-inside: avoid; /* No romper tablas/gráficos a la mitad */
+            margin-bottom: 40px; 
+            page-break-inside: avoid; 
             display: block;
-            clear: both;
         }
 
         .ciudad-header { 
-            background: var(--grey-light); padding: 12px 20px; border-left: 12px solid var(--dark); 
-            margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; 
+            background: var(--grey-light); padding: 10px 15px; border-left: 8px solid var(--dark); 
+            margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; 
         }
-        .ciudad-title { font-size: 1.5rem; font-weight: 900; text-transform: uppercase; margin: 0; }
-        .total-badge { background: var(--dark); color: #fff; padding: 7px 15px; border-radius: 5px; font-weight: 900; font-size: 1rem; }
+        .ciudad-title { font-size: 1.3rem; font-weight: 900; text-transform: uppercase; margin: 0; }
+        .total-badge { background: var(--dark); color: #fff; padding: 5px 12px; border-radius: 4px; font-weight: 900; font-size: 0.9rem; }
 
-        .chart-container { width: 100%; max-width: 800px; margin: 10px auto 30px auto; padding: 0; }
+        .chart-container { width: 100%; max-width: 700px; margin: 0 auto 20px; padding: 0; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { background: #eee; color: #000; padding: 15px; text-align: left; text-transform: uppercase; font-size: 0.8rem; border-bottom: 2px solid var(--dark); }
-        td { padding: 15px; border-bottom: 1px solid var(--grey-border); font-size: 0.95rem; }
+        th { background: #eee; color: #000; padding: 10px; text-align: left; text-transform: uppercase; font-size: 0.75rem; border-bottom: 2px solid var(--dark); }
+        td { padding: 10px; border-bottom: 1px solid var(--grey-border); font-size: 0.85rem; }
         tr:nth-child(even) { background: #fafafa; }
-        .votos-count { font-weight: 900; font-size: 1.3rem; text-align: right; }
+        .votos-count { font-weight: 900; font-size: 1.1rem; text-align: right; }
 
         .btn-pdf { 
-            display: block; width: 100%; max-width: 300px; margin: 50px auto; padding: 20px; 
+            display: block; width: 250px; margin: 30px auto; padding: 15px; 
             background: var(--dark); color: #fff; text-align: center; text-decoration: none; 
-            font-weight: 900; border-radius: 15px; text-transform: uppercase; cursor: pointer; border: none; 
+            font-weight: 900; border-radius: 8px; text-transform: uppercase; cursor: pointer; border: none; 
         }
 
         @media print { 
             .btn-pdf { display: none !important; } 
-            /* Forzamos el inicio del contenido en el pixel 0 */
             .wrapper-reporte { padding-top: 5mm !important; }
-            .header-reporte { margin-top: 0 !important; border-bottom-width: 5px !important; }
-            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
     </style>
 </head>
@@ -141,7 +131,8 @@
                         responsive: true,
                         animation: false,
                         scales: {
-                            y: { beginAtZero: true, ticks: { stepSize: 1, font: { weight: 'bold' } } }
+                            y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } } },
+                            x: { ticks: { font: { size: 9 } } }
                         },
                         plugins: { legend: { display: false } }
                     }
