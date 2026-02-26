@@ -1,86 +1,85 @@
 from flask import Flask, render_template, request, redirect, url_for
-import os
 
 app = Flask(__name__)
 
-# BASE DE DATOS COMPLETA: 15 CANDIDATOS POR CIUDAD PARA REJILLA 3X5
-partidos = [
-    # --- ORURO (15) ---
-    {"id": 1, "nombre": "MTS", "alcalde": "OLIVER OSCAR POMA CARTAGENA", "ciudad": "ORURO", "votos": 0},
-    {"id": 2, "nombre": "PATRIA ORURO", "alcalde": "RAFAEL VARGAS VILLEGAS", "ciudad": "ORURO", "votos": 0},
-    {"id": 3, "nombre": "LIBRE", "alcalde": "RENE BENJAMIN GUZMAN VARGAS", "ciudad": "ORURO", "votos": 0},
-    {"id": 4, "nombre": "PP", "alcalde": "CARLOS AGUILAR", "ciudad": "ORURO", "votos": 0},
-    {"id": 5, "nombre": "SOMOS ORURO", "alcalde": "MARCELO CORTEZ GUTIERREZ", "ciudad": "ORURO", "votos": 0},
-    {"id": 6, "nombre": "JACHA", "alcalde": "MARCELO FERNANDO MEDINA CENTELLAS", "ciudad": "ORURO", "votos": 0},
-    {"id": 7, "nombre": "SOL.BO", "alcalde": "MARCELO MEDINA", "ciudad": "ORURO", "votos": 0},
-    {"id": 8, "nombre": "UN", "alcalde": "SAMUEL DORIA MEDINA", "ciudad": "ORURO", "votos": 0},
-    {"id": 9, "nombre": "MAS-IPSP", "alcalde": "CANDIDATO 9 OR", "ciudad": "ORURO", "votos": 0},
-    {"id": 10, "nombre": "PBCP", "alcalde": "CANDIDATO 10 OR", "ciudad": "ORURO", "votos": 0},
-    {"id": 11, "nombre": "UCS", "alcalde": "CANDIDATO 11 OR", "ciudad": "ORURO", "votos": 0},
-    {"id": 12, "nombre": "PAN-BOL", "alcalde": "CANDIDATO 12 OR", "ciudad": "ORURO", "votos": 0},
-    {"id": 13, "nombre": "AS", "alcalde": "CANDIDATO 13 OR", "ciudad": "ORURO", "votos": 0},
-    {"id": 14, "nombre": "FPV", "alcalde": "CANDIDATO 14 OR", "ciudad": "ORURO", "votos": 0},
-    {"id": 15, "nombre": "BST", "alcalde": "CANDIDATO 15 OR", "ciudad": "ORURO", "votos": 0},
+# BASE DE DATOS LOCAL
+votos = [] 
 
-    # --- LA PAZ (15) ---
-    {"id": 16, "nombre": "UN", "alcalde": "SAMUEL DORIA MEDINA", "ciudad": "LA PAZ", "votos": 0},
-    {"id": 17, "nombre": "MAS-IPSP", "alcalde": "CESAR DOCKWEILER", "ciudad": "LA PAZ", "votos": 0},
-    {"id": 18, "nombre": "PBCP", "alcalde": "IVAN ARIAS", "ciudad": "LA PAZ", "votos": 0},
-    {"id": 19, "nombre": "SOL.BO", "alcalde": "ALVARO BLONDEL", "ciudad": "LA PAZ", "votos": 0},
-    {"id": 20, "nombre": "PAN-BOL", "alcalde": "AMILCAR BARAL", "ciudad": "LA PAZ", "votos": 0},
-    {"id": 21, "nombre": "UCS", "alcalde": "CANDIDATO 6 LP", "ciudad": "LA PAZ", "votos": 0},
-    {"id": 22, "nombre": "FPV", "alcalde": "CANDIDATO 7 LP", "ciudad": "LA PAZ", "votos": 0},
-    {"id": 23, "nombre": "MTS", "alcalde": "CANDIDATO 8 LP", "ciudad": "LA PAZ", "votos": 0},
-    {"id": 24, "nombre": "CC", "alcalde": "CANDIDATO 9 LP", "ciudad": "LA PAZ", "votos": 0},
-    {"id": 25, "nombre": "AS", "alcalde": "CANDIDATO 10 LP", "ciudad": "LA PAZ", "votos": 0},
-    {"id": 26, "nombre": "VENCEREMOS", "alcalde": "CANDIDATO 11 LP", "ciudad": "LA PAZ", "votos": 0},
-    {"id": 27, "nombre": "JALLALLA", "alcalde": "CANDIDATO 12 LP", "ciudad": "LA PAZ", "votos": 0},
-    {"id": 28, "nombre": "PDC", "alcalde": "CANDIDATO 13 LP", "ciudad": "LA PAZ", "votos": 0},
-    {"id": 29, "nombre": "MNR", "alcalde": "CANDIDATO 14 LP", "ciudad": "LA PAZ", "votos": 0},
-    {"id": 30, "nombre": "ADN", "alcalde": "CANDIDATO 15 LP", "ciudad": "LA PAZ", "votos": 0}
+# LISTA REAL DE CANDIDATOS SEGÚN PAPELETAS DE CONSULTA
+partidos_oruro = [
+    {"id": 1, "nombre": "MTS", "alcalde": "OLIVER OSCAR POMA CARTAGENA"},
+    {"id": 2, "nombre": "PATRIA ORURO", "alcalde": "RAFAEL VARGAS VILLEGAS"},
+    {"id": 3, "nombre": "LIBRE", "alcalde": "RENE BENJAMIN GUZMAN VARGAS"},
+    {"id": 4, "nombre": "PP", "alcalde": "CARLOS AGUILAR"},
+    {"id": 5, "nombre": "SOMOS ORURO", "alcalde": "MARCELO CORTEZ GUTIERREZ"},
+    {"id": 6, "nombre": "JACHA", "alcalde": "MARCELO FERNANDO MEDINA CENTELLAS"},
+    {"id": 7, "nombre": "SOL.BO", "alcalde": "MARCELO MEDINA"},
+    {"id": 8, "nombre": "UN", "alcalde": "SAMUEL DORIA MEDINA"},
+    {"id": 9, "nombre": "MAS-IPSP", "alcalde": "ADHEMAR WILCARANI"},
+    {"id": 10, "nombre": "PBCP", "alcalde": "LIZETH TITO"},
+    {"id": 11, "nombre": "UCS", "alcalde": "JORGE CALLE"},
+    {"id": 12, "nombre": "PAN-BOL", "alcalde": "MILTON GOMEZ"},
+    {"id": 13, "nombre": "AS", "alcalde": "ALVARO CASTELLON"},
+    {"id": 14, "nombre": "FPV", "alcalde": "JAVIER CALIZAYA"},
+    {"id": 15, "nombre": "BST", "alcalde": "FREDDY CANAVIRI"},
+    {"id": 16, "nombre": "LIDER", "alcalde": "CARMEN ROSA QUISPE"},
+    {"id": 17, "nombre": "UNSOL", "alcalde": "ESTEBAN MAMANI"}
 ]
 
-# Estructura de persistencia en memoria (mientras no se use PostgreSQL)
-votos_registrados = []
+partidos_lapaz = [
+    {"id": 101, "nombre": "SOBERANÍA", "alcalde": "FELIPE QUISPE"},
+    {"id": 102, "nombre": "SOL.BO", "alcalde": "ALVARO BLONDEL"},
+    {"id": 103, "nombre": "PAN-BOL", "alcalde": "AMILCAR BARRAL"},
+    {"id": 104, "nombre": "MAS-IPSP", "alcalde": "CESAR DOCKWEILER"},
+    {"id": 105, "nombre": "UCS", "alcalde": "PETER MALDONADO"},
+    {"id": 106, "nombre": "MTS", "alcalde": "RONALD ESCOBAR"},
+    {"id": 107, "nombre": "JALLALLA", "alcalde": "DAVID CASTRO"},
+    {"id": 108, "nombre": "PBCP", "alcalde": "LOURDES CHUMACERO"},
+    {"id": 109, "nombre": "FICO", "alcalde": "LUIS LARREA"},
+    {"id": 110, "nombre": "ASP", "alcalde": "RAMIRO BURGOS"},
+    {"id": 111, "nombre": "VENCEREMOS", "alcalde": "OSCAR HEREDIA"},
+    {"id": 112, "nombre": "UN", "alcalde": "WALDO ALBARRACIN"},
+    {"id": 113, "nombre": "FPV", "alcalde": "FRANKLIN FLORES"},
+    {"id": 114, "nombre": "C-A", "alcalde": "JOSE LUIS BEDREGAL"},
+    {"id": 115, "nombre": "MDS", "alcalde": "IVAN ARIAS"},
+    {"id": 116, "nombre": "MNR", "alcalde": "REINALDO GARCIA"},
+    {"id": 117, "nombre": "PDC", "alcalde": "ANA MARÍA FLORES"}
+]
 
 @app.route('/')
 def index():
     msg_type = request.args.get('msg_type')
-    ci = request.args.get('ci')
-    return render_template('index.html', msg_type=msg_type, ci_votante=ci)
+    ci_votante = request.args.get('ci')
+    return render_template('index.html', msg_type=msg_type, ci_votante=ci_votante)
 
 @app.route('/votar/<ciudad>')
 def votar(ciudad):
-    p_ciudad = [p for p in partidos if p['ciudad'] == ciudad.upper()]
-    return render_template('votar.html', ciudad=ciudad.upper(), partidos=p_ciudad)
+    ciudad_upper = ciudad.upper().replace("_", " ")
+    lista = partidos_oruro if "ORURO" in ciudad_upper else partidos_lapaz
+    return render_template('votar.html', ciudad=ciudad_upper, partidos=lista)
 
 @app.route('/confirmar_voto', methods=['POST'])
 def confirmar_voto():
-    ci = request.form.get('ci').strip()
-    p_id = int(request.form.get('partido_id'))
+    ci = request.form.get('ci')
     
-    # Bloqueo de duplicados
-    if any(v['ci'] == ci for v in votos_registrados):
-        return redirect(url_for('index', msg_type='error', ci=ci))
+    # Verificación de duplicados
+    for v in votos:
+        if v['ci'] == ci:
+            return redirect(url_for('index', msg_type='error', ci=ci))
     
-    # Registro de voto
-    votos_registrados.append({'ci': ci, 'partido_id': p_id})
-    for p in partidos:
-        if p['id'] == p_id:
-            p['votos'] += 1
-            break
-            
+    # Registro completo
+    nuevo_voto = {
+        "ci": ci,
+        "nombres": request.form.get('nombres').upper(),
+        "apellido": request.form.get('apellido').upper(),
+        "edad": request.form.get('edad'),
+        "genero": request.form.get('genero'),
+        "celular": request.form.get('celular'),
+        "partido_id": request.form.get('partido_id')
+    }
+    votos.append(nuevo_voto)
+    
     return redirect(url_for('index', msg_type='success', ci=ci))
 
-@app.route('/reporte')
-def reporte():
-    resultados = {}
-    ciudades = sorted(list(set(p['ciudad'] for p in partidos)))
-    for c in ciudades:
-        resultados[c] = sorted([p for p in partidos if p['ciudad'] == c], 
-                               key=lambda x: x['votos'], reverse=True)
-    return render_template('reporte.html', resultados=resultados)
-
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(debug=True)
