@@ -10,6 +10,7 @@ def get_db_connection():
 def obtener_partidos(ciudad):
     ciudad_upper = ciudad.upper()
     if "LA PAZ" in ciudad_upper:
+        # LISTA OFICIAL LA PAZ - 17 CANDIDATOS
         return [
             {"id": 101, "nombre": "JALLALLA", "alcalde": "DAVID CASTRO"},
             {"id": 102, "nombre": "ASP", "alcalde": "XAVIER ITURRALDE"},
@@ -30,6 +31,7 @@ def obtener_partidos(ciudad):
             {"id": 117, "nombre": "SUMA POR EL BIEN COMÚN", "alcalde": "IVÁN ARIAS"}
         ]
     else:
+        # LISTA OFICIAL ORURO - 14 CANDIDATOS (N°8 ELIMINADO)
         return [
             {"id": 1, "nombre": "FRI", "alcalde": "RENE ROBERTO MAMANI LLAVE"},
             {"id": 2, "nombre": "LEAL", "alcalde": "ADEMAR WILLCARANI MORALES"},
