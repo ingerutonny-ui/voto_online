@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, redirect, url_for
 app = Flask(__name__)
 
 def get_db_connection():
+    # Conexión directa a PostgreSQL en Render [cite: 2026-02-03]
     return psycopg2.connect(os.environ.get('DATABASE_URL'))
 
 def init_db():
@@ -28,11 +29,11 @@ def init_db():
 
 init_db()
 
+# DEFINICIÓN ÚNICA DE LOS 15 PARTIDOS OFICIALES
 def obtener_partidos(ciudad):
     es_lp = "LA PAZ" in ciudad.upper()
     offset = 100 if es_lp else 0
     
-    # Mapeo estricto de los 15 partidos de la papeleta
     return [
         {"id": 1 + offset, "nombre": "FRI", "alcalde": "CANDIDATO FRI"},
         {"id": 2 + offset, "nombre": "LODEL", "alcalde": "CANDIDATO LODEL"},
@@ -78,20 +79,25 @@ def confirmar_voto():
 
 @app.route('/reporte')
 def reporte():
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute('SELECT partido_id, COUNT(*) FROM votos GROUP BY partido_id')
-    conteos = dict(cur.fetchall())
-    cur.close()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute('SELECT partido_id, COUNT(*) FROM votos GROUP BY partido_id')
+        conteos = dict(cur.fetchall())
+        cur.close()
+        conn.close()
 
-    res = {}
-    for ciudad in ["ORURO", "LA PAZ"]:
-        lista = obtener_partidos(ciudad)
-        for p in lista:
-            p['votos'] = conteos.get(p['id'], 0)
-        res[ciudad] = lista
-    return render_template('reporte.html', resultados=res)
+        res = {}
+        for ciudad in ["ORURO", "LA PAZ"]:
+            lista = obtener_partidos(ciudad)
+            for p in lista:
+                p['votos'] = conteos.get(p['id'], 0)
+            res[ciudad] = lista
+        
+        # Enviamos los datos ya procesados para que el HTML no tenga que calcular nada [cite: 2026-02-11]
+        return render_template('reporte.html', resultados=res)
+    except Exception as e:
+        return f"Error en Reporte: {str(e)}", 500
 
 if __name__ == '__main__':
     app.run()
