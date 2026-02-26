@@ -8,62 +8,60 @@
     <style>
         :root { --dark: #000; --grey-light: #f4f4f4; --grey-border: #ddd; }
         
-        /* RESET TOTAL PARA EVITAR HOJA EN BLANCO */
+        /* RESET ABSOLUTO PARA ELIMINAR HOJA EN BLANCO */
         @page { size: auto; margin: 0; } 
         
-        html, body { margin: 0 !important; padding: 0 !important; width: 100%; }
+        html, body { margin: 0 !important; padding: 0 !important; height: 100%; width: 100%; }
 
-        body { 
-            font-family: 'Segoe UI', Arial, sans-serif; 
-            background: #fff; 
-            color: #000;
-        }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; color: #000; }
 
-        /* Contenedor principal con padding controlado */
-        .wrapper-reporte {
-            padding: 10mm 15mm;
-            position: relative;
-        }
+        /* Contenedor principal sin márgenes externos */
+        .wrapper-reporte { padding: 0; margin: 0; display: block; }
         
-        /* Forzamos que el encabezado no empuje contenido hacia abajo */
+        /* ENCABEZADO MINIMALISTA PARA EVITAR DESPLAZAMIENTOS */
         .header-reporte { 
             text-align: center; 
-            border-bottom: 4px solid var(--dark); 
-            padding-bottom: 15px; 
-            margin-bottom: 30px;
-            display: block;
+            border-bottom: 3px solid var(--dark); 
+            padding: 20px 0;
+            margin: 0 auto 20px auto;
+            width: 90%;
+            page-break-after: avoid;
         }
 
-        h1 { text-transform: uppercase; font-weight: 900; margin: 0; font-size: 1.8rem; letter-spacing: 2px; }
+        h1 { text-transform: uppercase; font-weight: 900; margin: 0; font-size: 1.6rem; }
         .sub { font-weight: 900; font-size: 0.8rem; margin-top: 5px; text-transform: uppercase; color: #444; }
 
-        .ciudad-section { margin-bottom: 50px; page-break-inside: avoid; clear: both; }
-        
+        .ciudad-section { 
+            width: 90%; 
+            margin: 0 auto 40px auto; 
+            page-break-inside: avoid; 
+        }
+
         .ciudad-header { 
-            background: var(--grey-light); padding: 12px 20px; border-left: 10px solid var(--dark); 
+            background: var(--grey-light); padding: 10px 20px; border-left: 10px solid var(--dark); 
             margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; 
         }
-        .ciudad-title { font-size: 1.4rem; font-weight: 900; text-transform: uppercase; margin: 0; }
-        .total-badge { background: var(--dark); color: #fff; padding: 6px 12px; border-radius: 4px; font-weight: 900; font-size: 1rem; }
+        .ciudad-title { font-size: 1.3rem; font-weight: 900; text-transform: uppercase; margin: 0; }
+        .total-badge { background: var(--dark); color: #fff; padding: 5px 12px; border-radius: 4px; font-weight: 900; font-size: 0.9rem; }
 
-        .chart-container { width: 100%; max-width: 750px; margin: 10px auto 30px; background: #fff; padding: 10px; }
+        .chart-container { width: 100%; max-width: 700px; margin: 0 auto 20px auto; background: #fff; padding: 0; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-        th { background: #eee; color: #000; padding: 12px; text-align: left; text-transform: uppercase; font-size: 0.8rem; border-bottom: 2px solid var(--dark); }
-        td { padding: 12px; border-bottom: 1px solid var(--grey-border); font-size: 0.9rem; }
+        th { background: #eee; color: #000; padding: 10px; text-align: left; text-transform: uppercase; font-size: 0.75rem; border-bottom: 2px solid var(--dark); }
+        td { padding: 10px; border-bottom: 1px solid var(--grey-border); font-size: 0.85rem; }
         tr:nth-child(even) { background: #fafafa; }
-        .votos-count { font-weight: 900; font-size: 1.2rem; text-align: right; }
+        .votos-count { font-weight: 900; font-size: 1.1rem; text-align: right; }
 
         .btn-pdf { 
-            display: block; width: 100%; max-width: 280px; margin: 40px auto; padding: 15px; 
+            display: block; width: 100%; max-width: 250px; margin: 30px auto; padding: 15px; 
             background: var(--dark); color: #fff; text-align: center; text-decoration: none; 
-            font-weight: 900; border-radius: 10px; text-transform: uppercase; cursor: pointer; border: none; 
+            font-weight: 900; border-radius: 8px; text-transform: uppercase; cursor: pointer; border: none; 
         }
 
         @media print { 
             .btn-pdf { display: none !important; } 
-            .wrapper-reporte { padding: 5mm 10mm !important; }
-            .header-reporte { margin-top: 0 !important; page-break-before: avoid; }
+            .wrapper-reporte { padding-top: 10mm !important; }
+            .header-reporte { margin-top: 0 !important; }
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
     </style>
