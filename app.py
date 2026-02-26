@@ -1,128 +1,97 @@
-import os
-import psycopg2
 from flask import Flask, render_template, request, redirect, url_for
+import sqlite3
 
 app = Flask(__name__)
 
-def get_db_connection():
-    return psycopg2.connect(os.environ.get('DATABASE_URL'))
-
 def init_db():
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute('''
+    conn = sqlite3.connect('votos.db')
+    cursor = conn.cursor()
+    cursor.execute('''
         CREATE TABLE IF NOT EXISTS votos (
-            id SERIAL PRIMARY KEY,
-            ci VARCHAR(20) UNIQUE NOT NULL,
-            nombres VARCHAR(100) NOT NULL,
-            apellido VARCHAR(100) NOT NULL,
-            edad INTEGER NOT NULL,
-            genero VARCHAR(20) NOT NULL,
-            celular VARCHAR(20) NOT NULL,
-            partido_id INTEGER NOT NULL
-        );
+            id INTEGER PRIMARY KEY,
+            ciudad TEXT,
+            partido TEXT,
+            alcalde TEXT,
+            votos INTEGER DEFAULT 0
+        )
     ''')
+    
+    # LISTA MAESTRA: Ordenada según papeleta oficial
+    # Se eliminan nombres antiguos y se ponen los oficiales: JA-HA, SOMOS PUEBLO, etc.
+    partidos_maestros = [
+        {"id": 1, "nombre": "FRI", "alcalde": "CANDIDATO FRI"},
+        {"id": 2, "nombre": "LODEL", "alcalde": "CANDIDATO LODEL"},
+        {"id": 3, "nombre": "NGP", "alcalde": "CANDIDATO NGP"},
+        {"id": 4, "nombre": "AORA", "alcalde": "CANDIDATO AORA"},
+        {"id": 5, "nombre": "UN", "alcalde": "SAMUEL DORIA MEDINA"},
+        {"id": 6, "nombre": "ALIANZA", "alcalde": "CANDIDATO ALIANZA"},
+        {"id": 7, "nombre": "AESA", "alcalde": "CANDIDATO AESA"},
+        {"id": 8, "nombre": "SÚMATE", "alcalde": "CANDIDATO SÚMATE"},
+        {"id": 9, "nombre": "MTS", "alcalde": "OLIVER OSCAR POMA CARTAGENA"},
+        {"id": 10, "nombre": "JALLALLA", "alcalde": "DAVID CASTRO"},
+        {"id": 11, "nombre": "LIBRE", "alcalde": "RENE BENJAMIN GUZMAN VARGAS"},
+        {"id": 12, "nombre": "PP", "alcalde": "CARLOS AGUILAR"},
+        {"id": 13, "nombre": "SOMOS PUEBLO", "alcalde": "MARCELO CORTEZ GUTIERREZ"},
+        {"id": 14, "nombre": "JA-HA", "alcalde": "MARCELO FERNANDO MEDINA CENTELLAS"},
+        {"id": 15, "nombre": "PDC", "alcalde": "ANA MARÍA FLORES"}
+    ]
+
+    # Insertar solo si la tabla está vacía para evitar duplicados en Render
+    cursor.execute('SELECT COUNT(*) FROM votos')
+    if cursor.fetchone()[0] == 0:
+        for p in partidos_maestros:
+            # Inicializamos para ORURO y LA PAZ con el mismo orden oficial
+            cursor.execute('INSERT INTO votos (id, ciudad, partido, alcalde, votos) VALUES (?, ?, ?, ?, ?)',
+                           (p['id'], "ORURO", p['nombre'], p['alcalde'], 0))
+            cursor.execute('INSERT INTO votos (id, ciudad, partido, alcalde, votos) VALUES (?, ?, ?, ?, ?)',
+                           (p['id'] + 100, "LA PAZ", p['nombre'], p['alcalde'], 0))
     conn.commit()
-    cur.close()
     conn.close()
 
 # ESTA LÍNEA ES LA SOLUCIÓN: Ejecuta la creación de tabla al cargar el módulo en Render
 init_db()
 
-partidos_oruro = [
-    {"id": 1, "nombre": "MTS", "alcalde": "OLIVER OSCAR POMA CARTAGENA"},
-    {"id": 2, "nombre": "PATRIA ORURO", "alcalde": "RAFAEL VARGAS VILLEGAS"},
-    {"id": 3, "nombre": "LIBRE", "alcalde": "RENE BENJAMIN GUZMAN VARGAS"},
-    {"id": 4, "nombre": "PP", "alcalde": "CARLOS AGUILAR"},
-    {"id": 5, "nombre": "SOMOS ORURO", "alcalde": "MARCELO CORTEZ GUTIERREZ"},
-    {"id": 6, "nombre": "JACHA", "alcalde": "MARCELO FERNANDO MEDINA CENTELLAS"},
-    {"id": 7, "nombre": "SOL.BO", "alcalde": "MARCELO MEDINA"},
-    {"id": 8, "nombre": "UN", "alcalde": "SAMUEL DORIA MEDINA"},
-    {"id": 9, "nombre": "MAS-IPSP", "alcalde": "ADHEMAR WILCARANI"},
-    {"id": 10, "nombre": "PBCP", "alcalde": "LIZETH TITO"},
-    {"id": 11, "nombre": "UCS", "alcalde": "JORGE CALLE"},
-    {"id": 12, "nombre": "PAN-BOL", "alcalde": "MILTON GOMEZ"},
-    {"id": 13, "nombre": "AS", "alcalde": "ALVARO CASTELLON"},
-    {"id": 14, "nombre": "FPV", "alcalde": "JAVIER CALIZAYA"},
-    {"id": 15, "nombre": "BST", "alcalde": "FREDDY CANAVIRI"},
-    {"id": 16, "nombre": "LIDER", "alcalde": "CARMEN ROSA QUISPE"},
-    {"id": 17, "nombre": "UNSOL", "alcalde": "ESTEBAN MAMANI"}
-]
-
-partidos_lapaz = [
-    {"id": 101, "nombre": "SOBERANÍA", "alcalde": "FELIPE QUISPE"},
-    {"id": 102, "nombre": "SOL.BO", "alcalde": "ALVARO BLONDEL"},
-    {"id": 103, "nombre": "PAN-BOL", "alcalde": "AMILCAR BARRAL"},
-    {"id": 104, "nombre": "MAS-IPSP", "alcalde": "CESAR DOCKWEILER"},
-    {"id": 105, "nombre": "UCS", "alcalde": "PETER MALDONADO"},
-    {"id": 106, "nombre": "MTS", "alcalde": "RONALD ESCOBAR"},
-    {"id": 107, "nombre": "JALLALLA", "alcalde": "DAVID CASTRO"},
-    {"id": 108, "nombre": "PBCP", "alcalde": "LOURDES CHUMACERO"},
-    {"id": 109, "nombre": "FICO", "alcalde": "LUIS LARREA"},
-    {"id": 110, "nombre": "ASP", "alcalde": "RAMIRO BURGOS"},
-    {"id": 111, "nombre": "VENCEREMOS", "alcalde": "OSCAR HEREDIA"},
-    {"id": 112, "nombre": "UN", "alcalde": "WALDO ALBARRACIN"},
-    {"id": 113, "nombre": "FPV", "alcalde": "FRANKLIN FLORES"},
-    {"id": 114, "nombre": "C-A", "alcalde": "JOSE LUIS BEDREGAL"},
-    {"id": 115, "nombre": "MDS", "alcalde": "IVAN ARIAS"},
-    {"id": 116, "nombre": "MNR", "alcalde": "REINALDO GARCIA"},
-    {"id": 117, "nombre": "PDC", "alcalde": "ANA MARÍA FLORES"}
-]
-
 @app.route('/')
 def index():
-    msg_type = request.args.get('msg_type')
-    ci_votante = request.args.get('ci')
-    return render_template('index.html', msg_type=msg_type, ci_votante=ci_votante)
+    return render_template('index.html')
 
 @app.route('/votar/<ciudad>')
 def votar(ciudad):
-    ciudad_upper = ciudad.upper().replace("_", " ")
-    lista = partidos_oruro if "ORURO" in ciudad_upper else partidos_lapaz
-    return render_template('votar.html', ciudad=ciudad_upper, partidos=lista)
+    conn = sqlite3.connect('votos.db')
+    cursor = conn.cursor()
+    # Mantenemos el orden por ID para que la vista de votación sea igual a la papeleta
+    cursor.execute('SELECT * FROM votos WHERE ciudad = ? ORDER BY id ASC', (ciudad,))
+    partidos = cursor.fetchall()
+    conn.close()
+    return render_template('votar.html', ciudad=ciudad, partidos=partidos)
 
-@app.route('/confirmar_voto', methods=['POST'])
-def confirmar_voto():
-    ci = request.form.get('ci')
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute('SELECT ci FROM votos WHERE ci = %s', (ci,))
-        if cur.fetchone():
-            cur.close()
-            conn.close()
-            return redirect(url_for('index', msg_type='error', ci=ci))
-        
-        cur.execute('''INSERT INTO votos (ci, nombres, apellido, edad, genero, celular, partido_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)''', (
-            ci, request.form.get('nombres').upper(), request.form.get('apellido').upper(), 
-            request.form.get('edad'), request.form.get('genero'),
-            request.form.get('celular'), request.form.get('partido_id')
-        ))
-        conn.commit()
-        cur.close()
-        conn.close()
-        return redirect(url_for('index', msg_type='success', ci=ci))
-    except Exception as e:
-        return f"Error Crítico: {str(e)}", 500
+@app.route('/registrar_voto/<int:partido_id>')
+def registrar_voto(partido_id):
+    conn = sqlite3.connect('votos.db')
+    cursor = conn.cursor()
+    cursor.execute('UPDATE votos SET votos = votos + 1 WHERE id = ?', (partido_id,))
+    cursor.execute('SELECT ciudad FROM votos WHERE id = ?', (partido_id,))
+    ciudad = cursor.fetchone()[0]
+    conn.commit()
+    conn.close()
+    return render_template('exito.html', ciudad=ciudad)
 
 @app.route('/reporte')
 def reporte():
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute('SELECT partido_id, COUNT(*) FROM votos GROUP BY partido_id')
-        conteos = dict(cur.fetchall())
-        cur.close()
-        conn.close()
+    conn = sqlite3.connect('votos.db')
+    cursor = conn.cursor()
+    # El orden ASC por ID garantiza que el FRI (ID 1) siempre sea el primero
+    cursor.execute('SELECT ciudad, partido, alcalde, votos FROM votos ORDER BY ciudad, id ASC')
+    data = cursor.fetchall()
+    conn.close()
 
-        for p in partidos_oruro: p['votos'] = conteos.get(p['id'], 0)
-        for p in partidos_lapaz: p['votos'] = conteos.get(p['id'], 0)
+    resultados = {}
+    for ciudad, partido, alcalde, votos in data:
+        if ciudad not in resultados:
+            resultados[ciudad] = []
+        resultados[ciudad].append({'nombre': partido, 'alcalde': alcalde, 'votos': votos})
 
-        resultados = {"ORURO": partidos_oruro, "LA PAZ": partidos_lapaz}
-        return render_template('reporte.html', resultados=resultados)
-    except Exception as e:
-        return f"Error en Reporte: {str(e)}", 500
+    return render_template('reporte.html', resultados=resultados)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
