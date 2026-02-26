@@ -4,13 +4,12 @@ from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
-# CONEXIÓN A POSTGRESQL EN LA NUBE (RENDER)
 def get_db_connection():
-    # Render proporciona la DATABASE_URL automáticamente
+    # Conexión obligatoria para evitar pérdida de datos en la nube
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     return conn
 
-# LISTA REAL DE CANDIDATOS (IGUAL QUE EL ANTERIOR)
+# LISTA REAL DE CANDIDATOS - ORURO
 partidos_oruro = [
     {"id": 1, "nombre": "MTS", "alcalde": "OLIVER OSCAR POMA CARTAGENA"},
     {"id": 2, "nombre": "PATRIA ORURO", "alcalde": "RAFAEL VARGAS VILLEGAS"},
@@ -31,6 +30,7 @@ partidos_oruro = [
     {"id": 17, "nombre": "UNSOL", "alcalde": "ESTEBAN MAMANI"}
 ]
 
+# LISTA REAL DE CANDIDATOS - LA PAZ
 partidos_lapaz = [
     {"id": 101, "nombre": "SOBERANÍA", "alcalde": "FELIPE QUISPE"},
     {"id": 102, "nombre": "SOL.BO", "alcalde": "ALVARO BLONDEL"},
@@ -66,35 +66,42 @@ def votar(ciudad):
 @app.route('/confirmar_voto', methods=['POST'])
 def confirmar_voto():
     ci = request.form.get('ci')
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    # VERIFICACIÓN EN LA BASE DE DATOS REAL
-    cur.execute('SELECT ci FROM votos WHERE ci = %s', (ci,))
-    if cur.fetchone():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute('SELECT ci FROM votos WHERE ci = %s', (ci,))
+        if cur.fetchone():
+            cur.close()
+            conn.close()
+            return redirect(url_for('index', msg_type='error', ci=ci))
+        # Mapeo completo de campos P1, P2 y P3
+        cur.execute('''INSERT INTO votos (ci, nombres, apellido, edad, genero, celular, partido_id)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)''', (ci, request.form.get('nombres').upper(), 
+            request.form.get('apellido').upper(), request.form.get('edad'), request.form.get('genero'),
+            request.form.get('celular'), request.form.get('partido_id')))
+        conn.commit()
         cur.close()
         conn.close()
-        return redirect(url_for('index', msg_type='error', ci=ci))
-    
-    # INSERCIÓN PERMANENTE (P1, P2, P3 mapeados)
-    cur.execute('''
-        INSERT INTO votos (ci, nombres, apellido, edad, genero, celular, partido_id)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-    ''', (
-        ci, 
-        request.form.get('nombres').upper(),
-        request.form.get('apellido').upper(),
-        request.form.get('edad'),
-        request.form.get('genero'),
-        request.form.get('celular'),
-        request.form.get('partido_id')
-    ))
-    
-    conn.commit()
-    cur.close()
-    conn.close()
-    
-    return redirect(url_for('index', msg_type='success', ci=ci))
+        return redirect(url_for('index', msg_type='success', ci=ci))
+    except Exception as e:
+        return f"Error crítico en base de datos: {str(e)}", 500
+
+@app.route('/reporte')
+def reporte():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute('SELECT partido_id, COUNT(*) FROM votos GROUP BY partido_id')
+        conteos = dict(cur.fetchall())
+        cur.close()
+        conn.close()
+        todos_partidos = partidos_oruro + partidos_lapaz
+        for p in todos_partidos:
+            p['votos'] = conteos.get(p['id'], 0)
+        return render_template('generar_reporte.html', partidos=todos_partidos)
+    except Exception as e:
+        return f"Error al generar reporte: {str(e)}", 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
