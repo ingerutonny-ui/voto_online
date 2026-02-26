@@ -9,65 +9,66 @@
             --dark: #000; 
             --soft-bg: #f8f9fa; 
             --border: #eeeeee; 
-            --rojo-voto: #ff0000; /* Rojo sólido solicitado */
+            --rojo-voto: #ff0000; 
             --rojo-hover: #cc0000; 
         }
         body { font-family: 'Segoe UI', sans-serif; background: #ffffff; margin: 0; padding: 20px; }
         header { text-align: center; border-bottom: 3px solid var(--dark); padding-bottom: 15px; margin-bottom: 30px; }
-        h1 { text-transform: uppercase; font-weight: 900; font-size: 2rem; }
+        h1 { text-transform: uppercase; font-weight: 900; font-size: 2rem; margin: 0; }
 
-        /* CUADRÍCULA 5x3 Y RESPONSIVA */
+        /* GRILLA DINÁMICA: 5 Columnas en PC */
         .grid-candidatos { 
             display: grid; 
             grid-template-columns: repeat(5, 1fr); 
-            gap: 15px; 
+            gap: 20px; 
             max-width: 1400px; 
             margin: auto; 
         }
 
         .card-partido { 
-            background: #fff; border: 1px solid var(--border); padding: 20px; border-radius: 20px; 
+            background: #fff; border: 1px solid var(--border); padding: 25px 15px; border-radius: 25px; 
             text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-            min-height: 160px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            min-height: 200px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); transition: 0.3s;
         }
-        .sigla { font-size: 1.5rem; font-weight: 900; color: var(--dark); }
-        
-        /* CAMBIO: Se agrandó el nombre del candidato */
-        .nombre-c { font-size: 1rem; text-transform: uppercase; color: #333; font-weight: 800; margin: 5px 0 15px; }
+        .card-partido:hover { transform: translateY(-5px); border-color: #ccc; }
 
-        /* BOTÓN VOTAR ROJO CON LETRAS BLANCAS */
+        .sigla { font-size: 1.6rem; font-weight: 900; color: var(--dark); line-height: 1.2; margin-bottom: 10px; }
+        .nombre-c { font-size: 0.85rem; text-transform: uppercase; color: #666; font-weight: 700; margin-bottom: 20px; min-height: 40px; display: flex; align-items: center; }
+
         .btn-abrir-voto { 
             background: var(--rojo-voto); 
-            color: #ffffff; /* Letras blancas solicitadas */
-            padding: 12px 20px; 
+            color: #ffffff; 
+            padding: 14px; 
             border: none; 
-            border-radius: 10px; 
-            font-weight: 800; 
-            font-size: 0.85rem; 
+            border-radius: 12px; 
+            font-weight: 900; 
+            font-size: 0.9rem; 
             cursor: pointer; 
             text-transform: uppercase; 
-            width: 90%; 
+            width: 100%; 
+            letter-spacing: 1px;
             transition: 0.3s;
         }
-        .btn-abrir-voto:hover { background: var(--rojo-hover); }
+        .btn-abrir-voto:hover { background: var(--rojo-hover); box-shadow: 0 5px 15px rgba(255,0,0,0.2); }
 
         /* MODAL */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: none; align-items: center; justify-content: center; z-index: 10000; }
-        .modal-content { background: #fff; padding: 40px; border-radius: 40px; width: 100%; max-width: 450px; border: 1px solid var(--border); box-shadow: 0 20px 60px rgba(0,0,0,0.1); text-align: center; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); display: none; align-items: center; justify-content: center; z-index: 10000; }
+        .modal-content { background: #fff; padding: 40px; border-radius: 40px; width: 90%; max-width: 480px; border: 1px solid var(--border); box-shadow: 0 25px 70px rgba(0,0,0,0.15); text-align: center; }
         
-        .form-voto { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-        input, select { padding: 18px; border: 1px solid #ddd; border-radius: 15px; font-size: 1rem; background: var(--soft-bg); width: 100%; box-sizing: border-box; }
+        .form-voto { display: flex; flex-direction: column; gap: 15px; margin-top: 25px; }
+        input, select { padding: 18px; border: 1px solid #eee; border-radius: 15px; font-size: 1rem; background: var(--soft-bg); width: 100%; box-sizing: border-box; font-weight: 600; }
+        input:focus { outline: none; border-color: var(--dark); background: #fff; }
 
-        .btn-confirmar { background: var(--dark); color: #fff; padding: 20px; border: none; border-radius: 15px; font-weight: 900; font-size: 1.1rem; cursor: pointer; text-transform: uppercase; }
+        .btn-confirmar { background: var(--dark); color: #fff; padding: 22px; border: none; border-radius: 20px; font-weight: 900; font-size: 1.2rem; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
 
-        /* RESPONSIVIDAD */
-        @media (max-width: 1100px) { .grid-candidatos { grid-template-columns: repeat(3, 1fr); } }
-        @media (max-width: 768px) { .grid-candidatos { grid-template-columns: repeat(2, 1fr); } h1 { font-size: 1.5rem; } }
-        @media (max-width: 480px) { .grid-candidatos { grid-template-columns: 1fr; } .modal-content { padding: 20px; width: 90%; } }
+        /* AJUSTES RESPONSIVOS PARA CELULARES */
+        @media (max-width: 1200px) { .grid-candidatos { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 850px) { .grid-candidatos { grid-template-columns: repeat(2, 1fr); } h1 { font-size: 1.6rem; } }
+        @media (max-width: 480px) { .grid-candidatos { grid-template-columns: 1fr; } .card-partido { min-height: auto; } }
     </style>
 </head>
 <body>
-    <header><h1>MUNICIPIO DE : {{ ciudad }}</h1></header>
+    <header><h1>CIUDAD DE: {{ ciudad }}</h1></header>
 
     <div class="grid-candidatos">
         {% for p in partidos %}
@@ -83,7 +84,7 @@
 
     <div id="modalVoto" class="modal">
         <div class="modal-content">
-            <h2 id="partido-titulo" style="font-weight: 900; margin: 0;"></h2>
+            <h2 id="partido-titulo" style="font-weight: 900; margin: 0; font-size: 2rem; color: #000;"></h2>
             <form action="/confirmar_voto" method="POST" class="form-voto">
                 <input type="hidden" name="partido_id" id="partido_id_input">
                 <input type="text" name="ci" placeholder="CÉDULA DE IDENTIDAD" required>
@@ -100,7 +101,7 @@
                 <input type="text" name="celular" placeholder="CELULAR" required>
                 <button type="submit" class="btn-confirmar">CONFIRMAR VOTO</button>
             </form>
-            <a href="#" style="display:block; margin-top:20px; color:#aaa; text-decoration:none; font-weight:900;" onclick="cerrarRegistro()">← CANCELAR</a>
+            <a href="#" style="display:block; margin-top:25px; color:#999; text-decoration:none; font-weight:900; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;" onclick="cerrarRegistro()">← CANCELAR OPERACIÓN</a>
         </div>
     </div>
 
@@ -109,8 +110,12 @@
             document.getElementById('partido_id_input').value = id;
             document.getElementById('partido-titulo').innerText = nombre;
             document.getElementById('modalVoto').style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Bloquea scroll
         }
-        function cerrarRegistro() { document.getElementById('modalVoto').style.display = 'none'; }
+        function cerrarRegistro() { 
+            document.getElementById('modalVoto').style.display = 'none'; 
+            document.body.style.overflow = 'auto'; // Libera scroll
+        }
     </script>
 </body>
 </html>
