@@ -1,84 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
     <title>Reporte de Votación</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        .barra-voto { height: 20px; background-color: #0d6efd; border-radius: 4px; transition: width 0.5s; }
+        @media print { .no-print { display: none; } }
+    </style>
 </head>
 <body class="bg-light">
-    <div class="container mt-4" id="bloque-reporte">
+    <div class="container mt-4" id="seccion-reporte">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>REPORTE DE RESULTADOS</h2>
-            <button onclick="exportarPDF()" class="btn btn-danger btn-sm">DESCARGAR PDF</button>
+            <h2 class="fw-bold">RESULTADOS OFICIALES</h2>
+            <button onclick="window.print()" class="btn btn-danger no-print">IMPRIMIR / PDF</button>
         </div>
 
         {% for ciudad, partidos in resultados.items() %}
         <div class="card mb-5 shadow-sm">
             <div class="card-header bg-dark text-white d-flex justify-content-between">
-                <span>{{ ciudad }}</span>
-                <span>TOTAL VOTOS: {{ totales[ciudad] }}</span>
+                <span class="h5 mb-0">{{ ciudad }}</span>
+                <span class="h5 mb-0">VOTOS TOTALES: {{ totales[ciudad] }}</span>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-7">
-                        <table class="table table-sm">
-                            <thead><tr><th>Partido</th><th>Candidato</th><th>Votos</th></tr></thead>
-                            <tbody>
-                                {% for p in partidos %}
-                                <tr><td>{{ p.nombre }}</td><td>{{ p.alcalde }}</td><td>{{ p.votos }}</td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-md-5">
-                        <canvas id="chart-{{ loop.index }}"></canvas>
-                    </div>
-                </div>
+                <table class="table table-borderless align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 20%">Partido</th>
+                            <th style="width: 65%">Visualización de Votos</th>
+                            <th style="width: 15%" class="text-center">Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in partidos %}
+                        <tr>
+                            <td class="fw-bold">{{ p.nombre }}</td>
+                            <td>
+                                {% if totales[ciudad] > 0 %}
+                                    {% set porcentaje = (p.votos / totales[ciudad]) * 100 %}
+                                    <div class="barra-voto" style="width: {{ porcentaje }}%;"></div>
+                                {% else %}
+                                    <div class="barra-voto" style="width: 0%;"></div>
+                                {% endif %}
+                            </td>
+                            <td class="text-center"><span class="badge bg-primary fs-6">{{ p.votos }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
         {% endfor %}
     </div>
-
-    <script>
-        {% for ciudad, partidos in resultados.items() %}
-        new Chart(document.getElementById('chart-{{ loop.index }}'), {
-            type: 'bar',
-            data: {
-                labels: [{% for p in partidos %}"{{ p.nombre }}",{% endfor %}],
-                datasets: [{
-                    label: 'Votos',
-                    data: [{% for p in partidos %}{{ p.votos }},{% endfor %}],
-                    backgroundColor: '#0d6efd'
-                }]
-            },
-            options: { 
-                indexAxis: 'y', 
-                responsive: true,
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1, // Esto elimina los decimales (0.2, 0.4, etc.)
-                            callback: function(value) {
-                                if (value % 1 === 0) { return value; }
-                            }
-                        }
-                    }
-                }
-            }
-        });
-        {% endfor %}
-
-        function exportarPDF() {
-            const element = document.getElementById('bloque-reporte');
-            html2pdf().set({
-                margin: 0,
-                filename: 'reporte_oficial.pdf',
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-            }).from(element).save();
-        }
-    </script>
 </body>
 </html>
