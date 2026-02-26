@@ -8,18 +8,24 @@
     <style>
         :root { --dark: #000; --grey-light: #f4f4f4; --grey-border: #ddd; }
         
-        /* FIX DEFINITIVO HOJA EN BLANCO */
+        /* ELIMINA CABECERAS Y PIES DE PÁGINA DEL NAVEGADOR */
         @page { 
             size: auto; 
-            margin: 0mm; /* Elimina márgenes físicos de la página */
+            margin: 0mm; 
         } 
         
         body { 
             font-family: 'Segoe UI', Arial, sans-serif; 
             background: #fff; 
             margin: 0; 
-            padding: 30px; 
+            padding: 0; 
             color: #000;
+            width: 100%;
+        }
+
+        /* Contenedor para manejar márgenes internos sin afectar el @page */
+        .wrapper-reporte {
+            padding: 15mm;
         }
         
         .header-reporte { text-align: center; border-bottom: 4px solid var(--dark); padding-bottom: 20px; margin-bottom: 40px; }
@@ -45,87 +51,79 @@
         .btn-pdf { display: block; width: 100%; max-width: 300px; margin: 50px auto; padding: 20px; background: var(--dark); color: #fff; text-align: center; text-decoration: none; font-weight: 900; border-radius: 15px; text-transform: uppercase; cursor: pointer; border: none; }
 
         @media print { 
-            /* Forzamos que el contenido empiece en el borde superior exacto */
-            html, body { 
-                margin: 0 !important; 
-                padding: 0 !important; 
-                overflow: visible !important;
-            }
-            body { padding: 10mm !important; } /* Margen interno para que no toque los bordes del papel */
-            
             .btn-pdf { display: none !important; } 
             .header-reporte { margin-top: 0 !important; }
-            
-            /* Evita saltos de página antes del primer título */
-            .header-reporte { page-break-before: avoid; }
+            body { -webkit-print-color-adjust: exact; } /* Asegura colores en Chrome/Edge */
         }
     </style>
 </head>
 <body>
 
-    <div class="header-reporte">
-        <h1>MONITOREO DE TENDENCIAS</h1>
-        <div class="sub">REPORTE OFICIAL DE CONSULTA CIUDADANA</div>
-    </div>
-
-    {% for ciudad, partidos in resultados.items() %}
-    <div class="ciudad-section">
-        <div class="ciudad-header">
-            <h2 class="ciudad-title">CIUDAD: {{ ciudad }}</h2>
-            <div class="total-badge">TOTAL: {{ partidos|sum(attribute='votos') }} VOTOS</div>
+    <div class="wrapper-reporte">
+        <div class="header-reporte">
+            <h1>MONITOREO DE TENDENCIAS</h1>
+            <div class="sub">REPORTE OFICIAL DE CONSULTA CIUDADANA</div>
         </div>
 
-        <div class="chart-container">
-            <canvas id="chart-{{ ciudad|replace(' ', '') }}"></canvas>
+        {% for ciudad, partidos in resultados.items() %}
+        <div class="ciudad-section">
+            <div class="ciudad-header">
+                <h2 class="ciudad-title">CIUDAD: {{ ciudad }}</h2>
+                <div class="total-badge">TOTAL: {{ partidos|sum(attribute='votos') }} VOTOS</div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="chart-{{ ciudad|replace(' ', '') }}"></canvas>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>PARTIDO / SIGLA</th>
+                        <th>CANDIDATO</th>
+                        <th style="text-align: right;">VOTOS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in partidos %}
+                    <tr>
+                        <td style="font-weight: 900;">{{ p.nombre }}</td>
+                        <td style="text-transform: uppercase;">{{ p.alcalde }}</td>
+                        <td class="votos-count">{{ p.votos }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>PARTIDO / SIGLA</th>
-                    <th>CANDIDATO</th>
-                    <th style="text-align: right;">VOTOS</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in partidos %}
-                <tr>
-                    <td style="font-weight: 900;">{{ p.nombre }}</td>
-                    <td style="text-transform: uppercase;">{{ p.alcalde }}</td>
-                    <td class="votos-count">{{ p.votos }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <script>
-        (function() {
-            const ctx = document.getElementById('chart-{{ ciudad|replace(" ", "") }}').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: [{% for p in partidos %}"{{ p.nombre }}",{% endfor %}],
-                    datasets: [{
-                        label: 'Votos',
-                        data: [{% for p in partidos %}{{ p.votos }},{% endfor %}],
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        borderColor: '#000',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    animation: false,
-                    scales: {
-                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        <script>
+            (function() {
+                const ctx = document.getElementById('chart-{{ ciudad|replace(" ", "") }}').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: [{% for p in partidos %}"{{ p.nombre }}",{% endfor %}],
+                        datasets: [{
+                            label: 'Votos',
+                            data: [{% for p in partidos %}{{ p.votos }},{% endfor %}],
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            borderColor: '#000',
+                            borderWidth: 1
+                        }]
                     },
-                    plugins: { legend: { display: false } }
-                }
-            });
-        })();
-    </script>
-    {% endfor %}
+                    options: {
+                        responsive: true,
+                        animation: false,
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            })();
+        </script>
+        {% endfor %}
+    </div>
 
     <button onclick="window.print()" class="btn-pdf">IMPRIMIR REPORTE (PDF)</button>
 
