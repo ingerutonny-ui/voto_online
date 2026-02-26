@@ -2,71 +2,38 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>MONITOREO DE TENDENCIAS - {{ proyecto }}</title>
+    <title>REPORTE DE TENDENCIAS</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        :root { --main-dark: #1a1a1a; --border-grey: #eeeeee; --zebra: #f9f9f9; }
-        body { background: #ffffff; color: var(--main-dark); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: auto; }
-        
-        /* HEADER REPORTE */
-        .page-header { text-align: center; padding: 30px 0; border-bottom: 1px solid var(--border-grey); margin-bottom: 30px; }
-        .page-header h1 { letter-spacing: 4px; font-weight: 900; margin: 0; text-transform: uppercase; font-size: 1.8rem; }
-        .page-header p { color: #888; font-size: 0.9rem; margin-top: 5px; }
-
-        .section-title { 
-            font-size: 1.2rem; font-weight: 900; color: #000; 
-            border-left: 4px solid #333; padding-left: 15px; 
-            margin: 40px 0 20px 0; text-transform: uppercase; 
-        }
-        
-        /* GRÁFICOS SOBRIOS */
-        canvas { background: #ffffff; border: 1px solid var(--border-grey); border-radius: 15px; padding: 20px; margin-bottom: 30px; }
-
-        /* TABLA CEBRA SUTIL */
-        table { width: 100%; border-collapse: collapse; margin-bottom: 50px; background: white; border-radius: 10px; overflow: hidden; border: 1px solid var(--border-grey); }
-        th { background: #f4f4f4; color: #000; padding: 15px; text-align: left; text-transform: uppercase; font-size: 0.75rem; font-weight: 900; }
-        td { padding: 12px 15px; border-bottom: 1px solid var(--border-grey); font-size: 0.9rem; }
-        
-        tr:nth-child(even) { background-color: var(--zebra); }
-        
-        .votos-count { font-weight: 900; color: #000; text-align: right; }
-        
-        /* CONTROLES */
-        .controls { position: fixed; bottom: 20px; right: 20px; display: flex; gap: 10px; z-index: 1000; }
-        .btn { padding: 15px 30px; border-radius: 50px; border: none; cursor: pointer; font-weight: 900; text-decoration: none; text-transform: uppercase; font-size: 0.8rem; transition: 0.3s; }
-        .btn-pdf { background: #000; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .btn-pdf:hover { transform: translateY(-3px); background: #333; }
-        .btn-back { background: #eee; color: #555; }
-
-        /* PDF CONFIG */
+        body { background: #fff; color: #1a1a1a; font-family: sans-serif; padding: 20px; }
+        .container { max-width: 900px; margin: auto; }
+        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 40px; }
+        h1 { margin: 0; text-transform: uppercase; letter-spacing: 2px; }
+        .section { margin-bottom: 60px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #f4f4f4; padding: 12px; border: 1px solid #ddd; text-align: left; }
+        td { padding: 10px; border: 1px solid #ddd; }
+        tr:nth-child(even) { background: #fafafa; }
         .page-break { page-break-before: always; }
-        @media print { .controls { display: none; } }
+        .btn-pdf { position: fixed; bottom: 20px; right: 20px; background: #000; color: #fff; padding: 15px 30px; border-radius: 50px; border: none; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
-
-<div class="container" id="reporte-area">
-    <div class="page-header">
-        <h1>MONITOREO DE TENDENCIAS</h1>
-        <p>HISTORIAL_CLINICO_NUBE | REPORTE DE CONSULTA CIUDADANA</p>
+<div id="reporte-pdf" class="container">
+    <div class="header">
+        <h1>PROYECTO EN LA NUBE</h1>
+        <p>REPORTE OFICIAL DE TENDENCIAS ELECTORALES</p>
     </div>
 
-    <div class="section-block">
-        <h2 class="section-title">CIUDAD: ORURO</h2>
-        <canvas id="chartOruro" height="110"></canvas>
+    <div class="section">
+        <h2>CIUDAD: ORURO</h2>
+        <canvas id="chartOruro" width="400" height="150"></canvas>
         <table>
-            <thead>
-                <tr><th>Sigla</th><th>Candidato</th><th style="text-align:right;">Votos Registrados</th></tr>
-            </thead>
+            <thead><tr><th>SIGLA</th><th>CANDIDATO</th><th>VOTOS</th></tr></thead>
             <tbody>
                 {% for r in res_oruro %}
-                <tr>
-                    <td><strong>{{ r.nombre }}</strong></td>
-                    <td>{{ r.alcalde }}</td>
-                    <td class="votos-count">{{ r.total }}</td>
-                </tr>
+                <tr><td><strong>{{ r.nombre }}</strong></td><td>{{ r.alcalde }}</td><td>{{ r.total }}</td></tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -74,70 +41,32 @@
 
     <div class="page-break"></div>
 
-    <div class="section-block">
-        <h2 class="section-title">CIUDAD: LA PAZ</h2>
-        <canvas id="chartLaPaz" height="110"></canvas>
+    <div class="section">
+        <h2>CIUDAD: LA PAZ</h2>
+        <canvas id="chartLaPaz" width="400" height="150"></canvas>
         <table>
-            <thead>
-                <tr><th>Sigla</th><th>Candidato</th><th style="text-align:right;">Votos Registrados</th></tr>
-            </thead>
+            <thead><tr><th>SIGLA</th><th>CANDIDATO</th><th>VOTOS</th></tr></thead>
             <tbody>
                 {% for r in res_lapaz %}
-                <tr>
-                    <td><strong>{{ r.nombre }}</strong></td>
-                    <td>{{ r.alcalde }}</td>
-                    <td class="votos-count">{{ r.total }}</td>
-                </tr>
+                <tr><td><strong>{{ r.nombre }}</strong></td><td>{{ r.alcalde }}</td><td>{{ r.total }}</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
-
-<div class="controls">
-    <button onclick="generarPDF()" class="btn btn-pdf">Descargar Reporte (PDF)</button>
-    <a href="/" class="btn btn-back">Regresar al Inicio</a>
-</div>
-
+<button class="btn-pdf" onclick="descargar()">DESCARGAR REPORTE PDF</button>
 <script>
-    const chartOptions = {
-        plugins: { legend: { display: false } },
-        scales: { 
-            y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
-            x: { grid: { display: false } }
-        }
-    };
-
-    // Gráfico Oruro (Gris Oscuro)
-    new Chart(document.getElementById('chartOruro'), {
-        type: 'bar',
-        data: {
-            labels: [{% for r in res_oruro %}"{{ r.nombre }}",{% endfor %}],
-            datasets: [{ data: [{% for r in res_oruro %}{{ r.total }},{% endfor %}], backgroundColor: '#333333' }]
-        },
-        options: chartOptions
-    });
-
-    // Gráfico La Paz (Gris Medio)
-    new Chart(document.getElementById('chartLaPaz'), {
-        type: 'bar',
-        data: {
-            labels: [{% for r in res_lapaz %}"{{ r.nombre }}",{% endfor %}],
-            datasets: [{ data: [{% for r in res_lapaz %}{{ r.total }},{% endfor %}], backgroundColor: '#666666' }]
-        },
-        options: chartOptions
-    });
-
-    function generarPDF() {
-        const element = document.getElementById('reporte-area');
-        const opt = {
-            margin: [0.5, 0.5],
-            filename: 'Reporte_Tendencias_Nancy_2026.pdf',
-            image: { type: 'jpeg', quality: 1 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-        };
-        html2pdf().set(opt).from(element).save();
+    function crearG(id, labels, data) {
+        new Chart(document.getElementById(id), {
+            type: 'bar',
+            data: { labels: labels, datasets: [{ label: 'Votos', data: data, backgroundColor: '#333' }] }
+        });
+    }
+    crearG('chartOruro', [{% for r in res_oruro %}"{{ r.nombre }}",{% endfor %}], [{% for r in res_oruro %}{{ r.total }},{% endfor %}]);
+    crearG('chartLaPaz', [{% for r in res_lapaz %}"{{ r.nombre }}",{% endfor %}], [{% for r in res_lapaz %}{{ r.total }},{% endfor %}]);
+    function descargar() {
+        const element = document.getElementById('reporte-pdf');
+        html2pdf().set({ margin: 0.5, filename: 'Reporte_Final.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).from(element).save();
     }
 </script>
 </body>
