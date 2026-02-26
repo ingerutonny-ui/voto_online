@@ -7,6 +7,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --dark: #000; --grey-light: #f4f4f4; --grey-border: #ddd; }
+        
+        /* Ajuste para eliminar hoja en blanco inicial */
+        @page { size: auto; margin: 10mm; } 
+        
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; margin: 0; padding: 30px; color: #000; }
         
         .header-reporte { text-align: center; border-bottom: 4px solid var(--dark); padding-bottom: 20px; margin-bottom: 40px; }
@@ -17,7 +21,6 @@
         .ciudad-header { background: var(--grey-light); padding: 15px 25px; border-left: 12px solid var(--dark); margin-bottom: 20px; }
         .ciudad-title { font-size: 1.6rem; font-weight: 900; text-transform: uppercase; margin: 0; }
 
-        /* CONTENEDOR DEL GRÁFICO */
         .chart-container { width: 100%; max-width: 800px; margin: 20px auto 40px; background: #fff; padding: 20px; border: 1px solid #eee; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
@@ -26,11 +29,13 @@
         tr:nth-child(even) { background: #fafafa; }
         .votos-count { font-weight: 900; font-size: 1.3rem; text-align: right; }
 
-        .btn-pdf { display: block; width: 100%; max-width: 300px; margin: 50px auto; padding: 20px; background: var(--dark); color: #fff; text-align: center; text-decoration: none; font-weight: 900; border-radius: 15px; text-transform: uppercase; cursor: pointer; }
+        .btn-pdf { display: block; width: 100%; max-width: 300px; margin: 50px auto; padding: 20px; background: var(--dark); color: #fff; text-align: center; text-decoration: none; font-weight: 900; border-radius: 15px; text-transform: uppercase; cursor: pointer; border: none; }
 
         @media print { 
+            body { padding: 0; margin: 0; }
             .btn-pdf { display: none; } 
             .chart-container { border: none; }
+            .header-reporte { margin-top: 0; }
         }
     </style>
 </head>
@@ -48,7 +53,7 @@
         </div>
 
         <div class="chart-container">
-            <canvas id="chart-{{ ciudad }}"></canvas>
+            <canvas id="chart-{{ ciudad|replace(' ', '') }}"></canvas>
         </div>
 
         <table>
@@ -73,13 +78,13 @@
 
     <script>
         (function() {
-            const ctx = document.getElementById('chart-{{ ciudad }}').getContext('2d');
+            const ctx = document.getElementById('chart-{{ ciudad|replace(" ", "") }}').getContext('2d');
             new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: [{% for p in partidos %}"{{ p.nombre }}",{% endfor %}],
                     datasets: [{
-                        label: 'Votos por Partido',
+                        label: 'Votos',
                         data: [{% for p in partidos %}{{ p.votos }},{% endfor %}],
                         backgroundColor: 'rgba(0, 0, 0, 0.8)',
                         borderColor: '#000',
@@ -88,12 +93,11 @@
                 },
                 options: {
                     responsive: true,
+                    animation: false, /* Importante para que el PDF capture el gráfico */
                     scales: {
                         y: { beginAtZero: true, ticks: { stepSize: 1 } }
                     },
-                    plugins: {
-                        legend: { display: false }
-                    }
+                    plugins: { legend: { display: false } }
                 }
             });
         })();
