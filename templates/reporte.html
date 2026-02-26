@@ -8,8 +8,8 @@
     <style>
         :root { --dark: #000; --grey-light: #f4f4f4; --grey-border: #ddd; }
         
-        /* Ajuste para eliminar hoja en blanco inicial */
-        @page { size: auto; margin: 10mm; } 
+        /* ELIMINACIÓN DE HOJA EN BLANCO: Margen cero en @page */
+        @page { size: auto; margin: 0; } 
         
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; margin: 0; padding: 30px; color: #000; }
         
@@ -18,8 +18,12 @@
         .sub { font-weight: 900; font-size: 0.9rem; margin-top: 10px; text-transform: uppercase; color: #444; }
 
         .ciudad-section { margin-bottom: 60px; page-break-inside: avoid; }
-        .ciudad-header { background: var(--grey-light); padding: 15px 25px; border-left: 12px solid var(--dark); margin-bottom: 20px; }
+        .ciudad-header { 
+            background: var(--grey-light); padding: 15px 25px; border-left: 12px solid var(--dark); 
+            margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; 
+        }
         .ciudad-title { font-size: 1.6rem; font-weight: 900; text-transform: uppercase; margin: 0; }
+        .total-badge { background: var(--dark); color: #fff; padding: 8px 15px; border-radius: 5px; font-weight: 900; font-size: 1.1rem; }
 
         .chart-container { width: 100%; max-width: 800px; margin: 20px auto 40px; background: #fff; padding: 20px; border: 1px solid #eee; }
 
@@ -31,11 +35,14 @@
 
         .btn-pdf { display: block; width: 100%; max-width: 300px; margin: 50px auto; padding: 20px; background: var(--dark); color: #fff; text-align: center; text-decoration: none; font-weight: 900; border-radius: 15px; text-transform: uppercase; cursor: pointer; border: none; }
 
+        /* CONFIGURACIÓN CRÍTICA PARA IMPRESIÓN */
         @media print { 
-            body { padding: 0; margin: 0; }
+            html, body { margin: 0; padding: 0; border: none; }
+            body { padding: 15mm; } /* El margen se controla aquí, no en @page */
             .btn-pdf { display: none; } 
-            .chart-container { border: none; }
-            .header-reporte { margin-top: 0; }
+            .chart-container { border: none; margin-top: 10px; }
+            .header-reporte { margin-top: 0; padding-top: 0; }
+            .ciudad-section { page-break-before: auto; }
         }
     </style>
 </head>
@@ -50,6 +57,7 @@
     <div class="ciudad-section">
         <div class="ciudad-header">
             <h2 class="ciudad-title">CIUDAD: {{ ciudad }}</h2>
+            <div class="total-badge">TOTAL: {{ partidos|sum(attribute='votos') }} VOTOS</div>
         </div>
 
         <div class="chart-container">
@@ -93,7 +101,7 @@
                 },
                 options: {
                     responsive: true,
-                    animation: false, /* Importante para que el PDF capture el gráfico */
+                    animation: false,
                     scales: {
                         y: { beginAtZero: true, ticks: { stepSize: 1 } }
                     },
