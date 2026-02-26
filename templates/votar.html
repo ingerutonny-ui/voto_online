@@ -7,31 +7,27 @@
     <style>
         :root { --soft-grey: #f8f9fa; --dark: #1a1a1a; --border: #eeeeee; }
         body { font-family: 'Segoe UI', sans-serif; background: #ffffff; color: var(--dark); margin: 0; padding: 15px; }
-        .container { max-width: 1100px; margin: auto; }
-        header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #000; padding-bottom: 15px; }
-        h1 { text-transform: uppercase; letter-spacing: 1px; font-weight: 900; margin: 0; font-size: 1.8rem; }
+        header { text-align: center; margin-bottom: 25px; border-bottom: 3px solid #000; padding-bottom: 15px; }
+        h1 { text-transform: uppercase; font-weight: 900; margin: 0; font-size: 1.8rem; }
 
-        .grid-candidatos { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 20px; }
-        .card-btn { background: #ffffff; border: 1px solid var(--border); padding: 30px 15px; border-radius: 25px; text-align: center; cursor: pointer; transition: 0.3s; width: 100%; display: flex; flex-direction: column; align-items: center; }
-        .card-btn:hover { transform: translateY(-3px); background: var(--soft-grey); }
-        .sigla { font-size: 1.8rem; font-weight: 900; color: #000; margin-bottom: 8px; }
+        /* GRID PARA MOSTRAR TODOS LOS CANDIDATOS */
+        .grid-candidatos { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .card-btn { background: #fff; border: 1px solid var(--border); padding: 25px 10px; border-radius: 20px; text-align: center; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; }
+        .card-btn:hover { background: var(--soft-grey); border-color: #999; }
+        .sigla { font-size: 1.6rem; font-weight: 900; color: #000; margin-bottom: 5px; }
+        .nombre { font-size: 0.75rem; text-transform: uppercase; color: #555; font-weight: 700; }
 
-        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.98); backdrop-filter: blur(15px); display: none; align-items:center; justify-content:center; z-index: 10000; padding: 10px; box-sizing: border-box; }
-        .modal-content { background: white; padding: 35px 25px; border-radius: 35px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 450px; border: 1px solid var(--border); }
-        
-        .form-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-        input, select { width: 100%; padding: 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; box-sizing: border-box; background: var(--soft-grey); font-family: inherit; }
-
-        /* CELDA DE CI DEBAJO DE APELLIDOS */
-        .input-ci { border: 2px solid #000 !important; font-weight: 900 !important; text-transform: uppercase; }
-
-        .btn-confirmar { width: 100%; padding: 20px; background: #000; color: white; border: none; border-radius: 15px; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 1.1rem; margin-top: 10px; }
-        .btn-cancelar { margin-top: 15px; display: inline-block; color: #aaa; text-decoration: none; font-weight: 900; cursor: pointer; font-size: 0.8rem; text-transform: uppercase; }
+        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.98); backdrop-filter: blur(15px); display: none; align-items:center; justify-content:center; z-index: 10000; padding: 10px; }
+        .modal-content { background: white; padding: 30px; border-radius: 35px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 450px; border: 1px solid var(--border); }
+        .form-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        input, select { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 10px; font-size: 0.95rem; box-sizing: border-box; background: var(--soft-grey); }
+        .input-ci { border: 2px solid #000 !important; font-weight: 900 !important; }
+        .btn-confirmar { width: 100%; padding: 18px; background: #000; color: white; border: none; border-radius: 12px; font-weight: 900; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+        .btn-cancelar { margin-top: 12px; display: inline-block; color: #aaa; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 0.75rem; }
     </style>
 </head>
 <body>
-<div class="container">
-    <header><h1>{{ ciudad }}</h1></header>
+    <header><h1>CIUDAD: {{ ciudad }}</h1></header>
     <div class="grid-candidatos">
         {% for p in partidos %}
         <button class="card-btn" onclick="abrirVoto({{ p.id }}, '{{ p.nombre }}')">
@@ -40,41 +36,37 @@
         </button>
         {% endfor %}
     </div>
-</div>
 
-<div class="modal" id="modalVoto">
-    <div class="modal-content">
-        <h3 id="nombre-partido" style="margin:0; font-weight:900; text-transform:uppercase;"></h3>
-        <p style="margin:5px 0 20px; color:#888;">REGISTRE SUS DATOS OFICIALES</p>
-        <form action="/confirmar_voto" method="POST" class="form-grid">
-            <input type="hidden" name="partido_id" id="input-partido-id">
-            <input type="text" name="nombres" placeholder="NOMBRES" required oninput="this.value = this.value.toUpperCase()">
-            <input type="text" name="apellido" placeholder="APELLIDOS" required oninput="this.value = this.value.toUpperCase()">
-            
-            <input type="text" name="ci" class="input-ci" placeholder="CÉDULA DE IDENTIDAD" required autocomplete="off">
-            
-            <div style="display: flex; gap: 8px;">
-                <input type="number" name="edad" placeholder="EDAD" required min="18" style="flex:1;">
-                <select name="genero" required style="flex:1.5;">
-                    <option value="">GÉNERO</option>
-                    <option value="MASCULINO">MASCULINO</option>
-                    <option value="FEMENINO">FEMENINO</option>
-                </select>
-            </div>
-            <input type="text" name="celular" placeholder="CELULAR" required>
-            <button type="submit" class="btn-confirmar">REGISTRAR VOTO OFICIAL</button>
-        </form>
-        <div class="btn-cancelar" onclick="cerrarVoto()">← VOLVER ATRÁS</div>
+    <div class="modal" id="modalVoto">
+        <div class="modal-content">
+            <h3 id="nombre-partido" style="margin:0; font-weight:900;"></h3>
+            <form action="/confirmar_voto" method="POST" class="form-grid">
+                <input type="hidden" name="partido_id" id="input-partido-id">
+                <input type="text" name="nombres" placeholder="NOMBRES" required oninput="this.value = this.value.toUpperCase()">
+                <input type="text" name="apellido" placeholder="APELLIDOS" required oninput="this.value = this.value.toUpperCase()">
+                <input type="text" name="ci" class="input-ci" placeholder="CÉDULA DE IDENTIDAD" required>
+                <div style="display: flex; gap: 5px;">
+                    <input type="number" name="edad" placeholder="EDAD" required min="18" style="flex:1;">
+                    <select name="genero" required style="flex:1.5;">
+                        <option value="">GÉNERO</option>
+                        <option value="MASCULINO">MASCULINO</option>
+                        <option value="FEMENINO">FEMENINO</option>
+                    </select>
+                </div>
+                <input type="text" name="celular" placeholder="CELULAR" required>
+                <button type="submit" class="btn-confirmar">REGISTRAR VOTO</button>
+            </form>
+            <div class="btn-cancelar" onclick="cerrarVoto()">← VOLVER</div>
+        </div>
     </div>
-</div>
 
-<script>
-    function abrirVoto(id, nombre) {
-        document.getElementById('input-partido-id').value = id;
-        document.getElementById('nombre-partido').innerText = "VOTAR POR: " + nombre;
-        document.getElementById('modalVoto').style.display = 'flex';
-    }
-    function cerrarVoto() { document.getElementById('modalVoto').style.display = 'none'; }
-</script>
+    <script>
+        function abrirVoto(id, nombre) {
+            document.getElementById('input-partido-id').value = id;
+            document.getElementById('nombre-partido').innerText = "PARTIDO: " + nombre;
+            document.getElementById('modalVoto').style.display = 'flex';
+        }
+        function cerrarVoto() { document.getElementById('modalVoto').style.display = 'none'; }
+    </script>
 </body>
 </html>
