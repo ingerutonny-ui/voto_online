@@ -10,7 +10,6 @@ def get_db_connection():
 def obtener_partidos(ciudad):
     ciudad_upper = ciudad.upper()
     if "LA PAZ" in ciudad_upper:
-        # LISTA OFICIAL LA PAZ - 17 CANDIDATOS (CON ASP CORREGIDO)
         return [
             {"id": 101, "nombre": "JALLALLA", "alcalde": "DAVID CASTRO"},
             {"id": 102, "nombre": "ASP", "alcalde": "XAVIER ITURRALDE"},
@@ -31,7 +30,6 @@ def obtener_partidos(ciudad):
             {"id": 117, "nombre": "SUMA POR EL BIEN COMÚN", "alcalde": "IVÁN ARIAS"}
         ]
     else:
-        # LISTA OFICIAL ORURO - 14 CANDIDATOS (N°8 ELIMINADO)
         return [
             {"id": 1, "nombre": "FRI", "alcalde": "RENE ROBERTO MAMANI LLAVE"},
             {"id": 2, "nombre": "LEAL", "alcalde": "ADEMAR WILLCARANI MORALES"},
@@ -64,28 +62,21 @@ def confirmar_voto():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        
-        # VALIDACIÓN DE CI DUPLICADO
         cur.execute("SELECT ci FROM votos WHERE ci = %s", (ci,))
         existe = cur.fetchone()
-        
         if existe:
             cur.close()
             conn.close()
             return redirect(url_for('index', msg_type='error', ci=ci))
-        
-        # INSERCIÓN SI NO EXISTE
         cur.execute('''INSERT INTO votos (ci, nombres, apellido, edad, genero, celular, partido_id) 
                        VALUES (%s, %s, %s, %s, %s, %s, %s)''', 
                     (ci, request.form['nombres'].upper(), request.form['apellido'].upper(), 
                      request.form['edad'], request.form['genero'], request.form['celular'], request.form['partido_id']))
-        
         conn.commit()
         cur.close()
         conn.close()
         return redirect(url_for('index', msg_type='success', ci=ci))
-        
-    except Exception as e:
+    except:
         return redirect(url_for('index', msg_type='error', ci=ci))
 
 @app.route('/reporte')
