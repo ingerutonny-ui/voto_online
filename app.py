@@ -10,10 +10,10 @@ def get_db_connection():
 def obtener_partidos(ciudad):
     ciudad_upper = ciudad.upper()
     if "LA PAZ" in ciudad_upper:
-        # LISTA OFICIAL LA PAZ - 17 CANDIDATOS COMPLETOS
+        # LISTA OFICIAL LA PAZ - 17 CANDIDATOS (CON ASP CORREGIDO)
         return [
             {"id": 101, "nombre": "JALLALLA", "alcalde": "DAVID CASTRO"},
-            {"id": 102, "nombre": "ASP", "alcalde": "ANA MARÍA QUINTEROS"},
+            {"id": 102, "nombre": "ASP", "alcalde": "XAVIER ITURRALDE"},
             {"id": 103, "nombre": "VENCEREMOS", "alcalde": "AMILCAR BARRAL"},
             {"id": 104, "nombre": "SOMOS LA PAZ", "alcalde": "CÉSAR DOCKWEILER"},
             {"id": 105, "nombre": "UPC", "alcalde": "FRANKLIN GUTIÉRREZ"},
