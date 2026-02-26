@@ -8,34 +8,20 @@
         body { font-family: 'Segoe UI', sans-serif; background: #ffffff; color: #333; margin: 0; padding: 20px; }
         .container { max-width: 900px; margin: auto; }
         h1 { text-align: center; color: #000; text-transform: uppercase; letter-spacing: 2px; }
-        
         .grid-candidatos { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 30px; }
-        
-        /* CARD SIN EFECTO ROJO - GRIS SUTIL */
-        .card { 
-            background: #fff; border: 1px solid #eee; padding: 20px; border-radius: 20px; 
-            text-align: center; cursor: pointer; transition: 0.3s; 
-        }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-color: #ccc; }
-        
-        /* SELECCIÓN EN GRIS CLARO */
-        .card.selected { 
-            background: #f0f0f0; border: 2px solid #999; box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
-        }
-        
+        .card { background: #fff; border: 1px solid #eee; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .card.selected { background: #f0f0f0; border: 2px solid #999; }
         .sigla { font-size: 1.5rem; font-weight: 900; color: #000; margin-bottom: 5px; }
         .nombre { font-size: 0.8rem; color: #666; height: 40px; display: flex; align-items: center; justify-content: center; }
-
         .form-voto { margin-top: 40px; background: #f9f9f9; padding: 30px; border-radius: 30px; border: 1px solid #eee; }
         input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-        
         .btn-enviar { width: 100%; padding: 18px; background: #333; color: white; border: none; border-radius: 15px; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 20px; }
-        .btn-enviar:hover { background: #000; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>CANDIDATOS: {{ ciudad }}</h1>
+    <h1>CIUDAD: {{ ciudad }}</h1>
     <form action="/confirmar_voto" method="POST" onsubmit="return validar()">
         <div class="grid-candidatos">
             {% for p in partidos %}
@@ -45,12 +31,10 @@
             </div>
             {% endfor %}
         </div>
-
         <input type="hidden" name="partido_id" id="partido_id" required>
-
         <div class="form-voto">
-            <h3 style="margin-top:0;">DATOS DEL CIUDADANO</h3>
-            <input type="text" name="ci" placeholder="NÚMERO DE CÉDULA" required>
+            <h3 style="margin:0 0 20px;">REGISTRO DE VOTANTE</h3>
+            <input type="text" name="ci" placeholder="CÉDULA DE IDENTIDAD" required>
             <input type="text" name="nombres" placeholder="NOMBRES" required>
             <input type="text" name="apellido" placeholder="APELLIDOS" required>
             <input type="number" name="edad" placeholder="EDAD" required min="18">
@@ -59,12 +43,11 @@
                 <option value="MASCULINO">MASCULINO</option>
                 <option value="FEMENINO">FEMENINO</option>
             </select>
-            <input type="text" name="celular" placeholder="TELÉFONO CELULAR" required>
-            <button type="submit" class="btn-enviar">CONFIRMAR VOTO OFICIAL</button>
+            <input type="text" name="celular" placeholder="CELULAR" required>
+            <button type="submit" class="btn-enviar">REGISTRAR VOTO</button>
         </div>
     </form>
 </div>
-
 <script>
     function seleccionar(el, id) {
         document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
@@ -73,8 +56,7 @@
     }
     function validar() {
         if(!document.getElementById('partido_id').value) {
-            alert("DEBE SELECCIONAR UN CANDIDATO");
-            return false;
+            alert("SELECCIONE UN CANDIDATO"); return false;
         }
         return true;
     }
