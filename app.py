@@ -3,9 +3,9 @@ import os
 
 app = Flask(__name__)
 
-# BASE DE DATOS COMPLETA SIN ERRORES
+# BASE DE DATOS CON 15 PARA ORURO Y 15 PARA LA PAZ (DISEÑO 3X5)
 partidos = [
-    # CANDIDATOS ORURO
+    # --- CANDIDATOS ORURO (15) ---
     {"id": 1, "nombre": "MTS", "alcalde": "OLIVER OSCAR POMA CARTAGENA", "ciudad": "ORURO", "votos": 0},
     {"id": 2, "nombre": "PATRIA ORURO", "alcalde": "RAFAEL VARGAS VILLEGAS", "ciudad": "ORURO", "votos": 0},
     {"id": 3, "nombre": "LIBRE", "alcalde": "RENE BENJAMIN GUZMAN VARGAS", "ciudad": "ORURO", "votos": 0},
@@ -13,13 +13,31 @@ partidos = [
     {"id": 5, "nombre": "SOMOS ORURO", "alcalde": "MARCELO CORTEZ GUTIERREZ", "ciudad": "ORURO", "votos": 0},
     {"id": 6, "nombre": "JACHA", "alcalde": "MARCELO FERNANDO MEDINA CENTELLAS", "ciudad": "ORURO", "votos": 0},
     {"id": 7, "nombre": "SOL.BO", "alcalde": "MARCELO MEDINA", "ciudad": "ORURO", "votos": 0},
-    
-    # CANDIDATOS LA PAZ
-    {"id": 8, "nombre": "UN", "alcalde": "SAMUEL DORIA MEDINA", "ciudad": "LA PAZ", "votos": 0},
-    {"id": 9, "nombre": "MAS-IPSP", "alcalde": "CESAR DOCKWEILER", "ciudad": "LA PAZ", "votos": 0},
-    {"id": 10, "nombre": "PBCP", "alcalde": "IVAN ARIAS", "ciudad": "LA PAZ", "votos": 0},
-    {"id": 11, "nombre": "SOL.BO", "alcalde": "ALVARO BLONDEL", "ciudad": "LA PAZ", "votos": 0},
-    {"id": 12, "nombre": "PAN-BOL", "alcalde": "AMILCAR BARAL", "ciudad": "LA PAZ", "votos": 0}
+    {"id": 8, "nombre": "UN", "alcalde": "CANDIDATO 8 OR", "ciudad": "ORURO", "votos": 0},
+    {"id": 9, "nombre": "MAS-IPSP", "alcalde": "CANDIDATO 9 OR", "ciudad": "ORURO", "votos": 0},
+    {"id": 10, "nombre": "PBCP", "alcalde": "CANDIDATO 10 OR", "ciudad": "ORURO", "votos": 0},
+    {"id": 11, "nombre": "UCS", "alcalde": "CANDIDATO 11 OR", "ciudad": "ORURO", "votos": 0},
+    {"id": 12, "nombre": "PAN-BOL", "alcalde": "CANDIDATO 12 OR", "ciudad": "ORURO", "votos": 0},
+    {"id": 13, "nombre": "AS", "alcalde": "CANDIDATO 13 OR", "ciudad": "ORURO", "votos": 0},
+    {"id": 14, "nombre": "FPV", "alcalde": "CANDIDATO 14 OR", "ciudad": "ORURO", "votos": 0},
+    {"id": 15, "nombre": "BST", "alcalde": "CANDIDATO 15 OR", "ciudad": "ORURO", "votos": 0},
+
+    # --- CANDIDATOS LA PAZ (15) ---
+    {"id": 16, "nombre": "UN", "alcalde": "SAMUEL DORIA MEDINA", "ciudad": "LA PAZ", "votos": 0},
+    {"id": 17, "nombre": "MAS-IPSP", "alcalde": "CESAR DOCKWEILER", "ciudad": "LA PAZ", "votos": 0},
+    {"id": 18, "nombre": "PBCP", "alcalde": "IVAN ARIAS", "ciudad": "LA PAZ", "votos": 0},
+    {"id": 19, "nombre": "SOL.BO", "alcalde": "ALVARO BLONDEL", "ciudad": "LA PAZ", "votos": 0},
+    {"id": 20, "nombre": "PAN-BOL", "alcalde": "AMILCAR BARAL", "ciudad": "LA PAZ", "votos": 0},
+    {"id": 21, "nombre": "UCS", "alcalde": "CANDIDATO 6 LP", "ciudad": "LA PAZ", "votos": 0},
+    {"id": 22, "nombre": "FPV", "alcalde": "CANDIDATO 7 LP", "ciudad": "LA PAZ", "votos": 0},
+    {"id": 23, "nombre": "MTS", "alcalde": "CANDIDATO 8 LP", "ciudad": "LA PAZ", "votos": 0},
+    {"id": 24, "nombre": "CC", "alcalde": "CANDIDATO 9 LP", "ciudad": "LA PAZ", "votos": 0},
+    {"id": 25, "nombre": "AS", "alcalde": "CANDIDATO 10 LP", "ciudad": "LA PAZ", "votos": 0},
+    {"id": 26, "nombre": "VENCEREMOS", "alcalde": "CANDIDATO 11 LP", "ciudad": "LA PAZ", "votos": 0},
+    {"id": 27, "nombre": "JALLALLA", "alcalde": "CANDIDATO 12 LP", "ciudad": "LA PAZ", "votos": 0},
+    {"id": 28, "nombre": "PDC", "alcalde": "CANDIDATO 13 LP", "ciudad": "LA PAZ", "votos": 0},
+    {"id": 29, "nombre": "MNR", "alcalde": "CANDIDATO 14 LP", "ciudad": "LA PAZ", "votos": 0},
+    {"id": 30, "nombre": "ADN", "alcalde": "CANDIDATO 15 LP", "ciudad": "LA PAZ", "votos": 0}
 ]
 
 votos_registrados = []
@@ -32,6 +50,7 @@ def index():
 
 @app.route('/votar/<ciudad>')
 def votar(ciudad):
+    # El filtro ahora detecta si es ORURO o LA PAZ y trae sus 15 candidatos
     p_ciudad = [p for p in partidos if p['ciudad'] == ciudad]
     return render_template('votar.html', ciudad=ciudad, partidos=p_ciudad)
 
