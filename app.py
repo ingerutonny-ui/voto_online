@@ -59,37 +59,28 @@ def obtener_partidos(ciudad):
 @app.route('/')
 def index():
     return render_template('index.html', 
-                           msg_type=request.args.get('msg_type', ''), 
-                           ci=request.args.get('ci', ''),
-                           reset=request.args.get('reset', ''))
+                           msg_type=request.args.get('msg_type', None), 
+                           ci=request.args.get('ci', ""),
+                           reset=request.args.get('reset', 'false'))
 
 @app.route('/votar/<ciudad>')
 def votar(ciudad):
     return render_template('votar.html', ciudad=ciudad.replace("_", " "), partidos=obtener_partidos(ciudad))
 
-@app.route('/reset_maestro')
-def reset_maestro():
-    if request.args.get('clave') == CLAVE_MAESTRA:
-        return redirect(url_for('index', reset='true'))
-    return "ERROR", 403
-
 @app.route('/confirmar_voto', methods=['POST'])
 def confirmar_voto():
     ci = request.form['ci']
-    celular = request.form['celular']
+    cel = request.form['celular']
     try:
         conn = get_db_connection(); cur = conn.cursor()
-        
-        # VALIDACIÓN DOBLE: CI y CELULAR
-        cur.execute("SELECT ci FROM votos WHERE ci = %s OR celular = %s", (ci, celular))
+        cur.execute("SELECT ci FROM votos WHERE ci = %s OR celular = %s", (ci, cel))
         if cur.fetchone():
             cur.close(); conn.close()
             return redirect(url_for('index', msg_type='error', ci=ci))
-            
         cur.execute("INSERT INTO votos (ci, nombres, apellido, edad, genero, celular, partido_id) VALUES (%s, %s, %s, %s, %s, %s, %s)", 
-                    (ci, request.form['nombres'].upper(), request.form['apellido'].upper(), request.form['edad'], request.form['genero'], celular, request.form['partido_id']))
+                    (ci, request.form['nombres'].upper(), request.form['apellido'].upper(), request.form['edad'], request.form['genero'], cel, request.form['partido_id']))
         conn.commit(); cur.close(); conn.close()
-        enviar_whatsapp(celular, ci)
+        enviar_whatsapp(cel, ci)
         return redirect(url_for('index', msg_type='success', ci=ci))
     except: return redirect(url_for('index', msg_type='error', ci=ci))
 
