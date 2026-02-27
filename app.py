@@ -4,6 +4,8 @@ import requests
 from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
+
+# LLAVE MAESTRA DEFINIDA POR EL INGE
 CLAVE_MAESTRA = "INGE_ACCESO_TOTAL_2026"
 
 def get_db_connection():
@@ -11,16 +13,61 @@ def get_db_connection():
 
 def enviar_whatsapp(numero, ci):
     url = "https://api.ultramsg.com/instance163345/messages/chat"
-    mensaje = f"✅ *VOTO REGISTRADO*\nCI: *{ci}*."
-    payload = {"token": "rmcd9oavsczcgdg4", "to": f"+591{numero}", "body": mensaje}
+    mensaje = (
+        f"✅ *VOTO REGISTRADO EXITOSAMENTE*\n\n"
+        f"Se ha confirmado su participación con el CI: *{ci}*.\n"
+        f"Gracias por ser parte de la Consulta Ciudadana."
+    )
+    payload = {
+        "token": "rmcd9oavsczcgdg4",
+        "to": f"+591{numero}",
+        "body": mensaje
+    }
     headers = {'content-type': 'application/x-www-form-urlencoded'}
-    try: requests.post(url, data=payload, headers=headers, timeout=5)
-    except: pass
+    try:
+        requests.post(url, data=payload, headers=headers, timeout=5)
+    except:
+        pass
 
 def obtener_partidos(ciudad):
-    if "LA PAZ" in ciudad.upper():
-        return [{"id": 101, "nombre": "JALLALLA", "alcalde": "JHONNY PLATA"}, {"id": 102, "nombre": "ASP", "alcalde": "XAVIER ITURRALDE"}, {"id": 103, "nombre": "VENCEREMOS", "alcalde": "WALDO ALBARRACÍN"}, {"id": 104, "nombre": "SOMOS LA PAZ", "alcalde": "MIGUEL ROCA"}, {"id": 105, "nombre": "UPC", "alcalde": "LUIS EDUARDO SILES"}, {"id": 106, "nombre": "LIBRE", "alcalde": "CARLOS PALENQUE"}, {"id": 107, "nombre": "A-UPP", "alcalde": "ISAAC FERNÁNDEZ"}, {"id": 108, "nombre": "INNOVACIÓN HUMANA", "alcalde": "CÉSAR DOCKWEILER"}, {"id": 109, "nombre": "VIDA", "alcalde": "FERNANDO VALENCIA"}, {"id": 110, "nombre": "FRI", "alcalde": "RAÚL DAZA"}, {"id": 111, "nombre": "PDC", "alcalde": "MARIO SILVA"}, {"id": 112, "nombre": "MTS", "alcalde": "JORGE DULON"}, {"id": 113, "nombre": "NGP", "alcalde": "HERNÁN RODRIGO RIVERA"}, {"id": 114, "nombre": "MPS", "alcalde": "RICARDO CUEVAS"}, {"id": 115, "nombre": "APB-SÚMATE", "alcalde": "ÓSCAR SOGLIANO"}, {"id": 116, "nombre": "ALIANZA PATRIA", "alcalde": "CARLOS NEMO RIVERA"}, {"id": 117, "nombre": "SUMA POR EL BIEN COMÚN", "alcalde": "IVÁN ARIAS"}]
-    return [{"id": 1, "nombre": "FRI", "alcalde": "RENE ROBERTO MAMANI LLAVE"}, {"id": 2, "nombre": "LEAL", "alcalde": "ADEMAR WILLCARANI MORALES"}, {"id": 3, "nombre": "NGP", "alcalde": "IVAN QUISPE GUTIERREZ"}, {"id": 4, "nombre": "AORA", "alcalde": "SANTIAGO CONDORI APAZA"}, {"id": 5, "nombre": "UN", "alcalde": "ENRIQUE FERNANDO"}, {"id": 6, "nombre": "AUPP", "alcalde": "JUAN CARLOS CHOQUE ZUBIETA"}, {"id": 7, "nombre": "UCS", "alcalde": "LINO MARCOS MAIN"}, {"id": 8, "nombre": "SÚMATE", "alcalde": "OSCAR MIGUEL TOCO CHOQUE"}, {"id": 9, "nombre": "MTS", "alcalde": "OLIVER OSCAR POMA CARTAGENA"}, {"id": 10, "nombre": "ALIANZA PATRIA ORURO", "alcalde": "RAFAEL VARGAS VILLEGAS"}, {"id": 11, "nombre": "LIBRE", "alcalde": "RENE BENJAMIN GUZMAN VARGAS"}, {"id": 12, "nombre": "PP", "alcalde": "CARLOS AGUILAR"}, {"id": 13, "nombre": "SOMOS ORURO", "alcalde": "MARCELO CORTEZ GUTIERREZ"}, {"id": 14, "nombre": "JACHA", "alcalde": "MARCELO FERNANDO MEDINA"}]
+    ciudad_upper = ciudad.upper()
+    if "LA PAZ" in ciudad_upper:
+        return [
+            {"id": 101, "nombre": "JALLALLA", "alcalde": "JHONNY PLATA"},
+            {"id": 102, "nombre": "ASP", "alcalde": "XAVIER ITURRALDE"},
+            {"id": 103, "nombre": "VENCEREMOS", "alcalde": "WALDO ALBARRACÍN"},
+            {"id": 104, "nombre": "SOMOS LA PAZ", "alcalde": "MIGUEL ROCA"},
+            {"id": 105, "nombre": "UPC", "alcalde": "LUIS EDUARDO SILES"},
+            {"id": 106, "nombre": "LIBRE", "alcalde": "CARLOS PALENQUE"},
+            {"id": 107, "nombre": "A-UPP", "alcalde": "ISAAC FERNÁNDEZ"},
+            {"id": 108, "nombre": "INNOVACIÓN HUMANA", "alcalde": "CÉSAR DOCKWEILER"},
+            {"id": 109, "nombre": "VIDA", "alcalde": "FERNANDO VALENCIA"},
+            {"id": 110, "nombre": "FRI", "alcalde": "RAÚL DAZA"},
+            {"id": 111, "nombre": "PDC", "alcalde": "MARIO SILVA"},
+            {"id": 112, "nombre": "MTS", "alcalde": "JORGE DULON"},
+            {"id": 113, "nombre": "NGP", "alcalde": "HERNÁN RODRIGO RIVERA"},
+            {"id": 114, "nombre": "MPS", "alcalde": "RICARDO CUEVAS"},
+            {"id": 115, "nombre": "APB-SÚMATE", "alcalde": "ÓSCAR SOGLIANO"},
+            {"id": 116, "nombre": "ALIANZA PATRIA", "alcalde": "CARLOS NEMO RIVERA"},
+            {"id": 117, "nombre": "SUMA POR EL BIEN COMÚN", "alcalde": "IVÁN ARIAS"}
+        ]
+    else:
+        return [
+            {"id": 1, "nombre": "FRI", "alcalde": "RENE ROBERTO MAMANI LLAVE"},
+            {"id": 2, "nombre": "LEAL", "alcalde": "ADEMAR WILLCARANI MORALES"},
+            {"id": 3, "nombre": "NGP", "alcalde": "IVAN QUISPE GUTIERREZ"},
+            {"id": 4, "nombre": "AORA", "alcalde": "SANTIAGO CONDORI APAZA"},
+            {"id": 5, "nombre": "UN", "alcalde": "ENRIQUE FERNANDO"},
+            {"id": 6, "nombre": "AUPP", "alcalde": "JUAN CARLOS CHOQUE ZUBIETA"},
+            {"id": 7, "nombre": "UCS", "alcalde": "LINO MARCOS MAIN"},
+            {"id": 8, "nombre": "SÚMATE", "alcalde": "OSCAR MIGUEL TOCO CHOQUE"},
+            {"id": 9, "nombre": "MTS", "alcalde": "OLIVER OSCAR POMA CARTAGENA"},
+            {"id": 10, "nombre": "ALIANZA PATRIA ORURO", "alcalde": "RAFAEL VARGAS VILLEGAS"},
+            {"id": 11, "nombre": "LIBRE", "alcalde": "RENE BENJAMIN GUZMAN VARGAS"},
+            {"id": 12, "nombre": "PP", "alcalde": "CARLOS AGUILAR"},
+            {"id": 13, "nombre": "SOMOS ORURO", "alcalde": "MARCELO CORTEZ GUTIERREZ"},
+            {"id": 14, "nombre": "JACHA", "alcalde": "MARCELO FERNANDO MEDINA"}
+        ]
 
 @app.route('/')
 def index():
@@ -38,23 +85,30 @@ def votar(ciudad):
 def reset_maestro():
     if request.args.get('clave') == CLAVE_MAESTRA:
         return redirect(url_for('index', reset='true'))
-    return "ERROR", 403
+    return "ACCESO DENEGADO", 403
 
 @app.route('/confirmar_voto', methods=['POST'])
 def confirmar_voto():
     ci = request.form['ci']
     celular = request.form['celular']
     try:
-        conn = get_db_connection(); cur = conn.cursor()
+        conn = get_db_connection()
+        cur = conn.cursor()
         cur.execute("SELECT ci FROM votos WHERE ci = %s", (ci,))
         if cur.fetchone():
             cur.close(); conn.close()
             return redirect(url_for('index', msg_type='error', ci=ci))
-        cur.execute("INSERT INTO votos (ci, nombres, apellido, edad, genero, celular, partido_id) VALUES (%s, %s, %s, %s, %s, %s, %s)", (ci, request.form['nombres'].upper(), request.form['apellido'].upper(), request.form['edad'], request.form['genero'], celular, request.form['partido_id']))
+        
+        cur.execute('''INSERT INTO votos (ci, nombres, apellido, edad, genero, celular, partido_id) 
+                       VALUES (%s, %s, %s, %s, %s, %s, %s)''', 
+                    (ci, request.form['nombres'].upper(), request.form['apellido'].upper(), 
+                     request.form['edad'], request.form['genero'], celular, request.form['partido_id']))
         conn.commit(); cur.close(); conn.close()
+        
         enviar_whatsapp(celular, ci)
         return redirect(url_for('index', msg_type='success', ci=ci))
-    except: return redirect(url_for('index', msg_type='error', ci=ci))
+    except:
+        return redirect(url_for('index', msg_type='error', ci=ci))
 
 @app.route('/reporte')
 def reporte():
@@ -65,10 +119,13 @@ def reporte():
         res = {}; totales = {}
         for ciudad in ["ORURO", "LA PAZ"]:
             lista = obtener_partidos(ciudad); suma = 0
-            for p in lista: p['votos'] = conteos.get(p['id'], 0); suma += p['votos']
+            for p in lista:
+                p['votos'] = conteos.get(p['id'], 0)
+                suma += p['votos']
             res[ciudad] = lista; totales[ciudad] = suma
         return render_template('reporte.html', resultados=res, totales=totales)
-    except: return "Error", 500
+    except:
+        return "Error en reporte", 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
