@@ -4,6 +4,7 @@ import requests
 from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
+# Su clave maestra para desbloquear dispositivos
 CLAVE_MAESTRA = "INGE_ACCESO_TOTAL_2026"
 
 def get_db_connection():
@@ -59,9 +60,18 @@ def obtener_partidos(ciudad):
 @app.route('/')
 def index():
     return render_template('index.html', 
-                           msg_type=request.args.get('msg_type', None), 
+                           msg_type=request.args.get('msg_type'), 
                            ci=request.args.get('ci', ""),
                            reset=request.args.get('reset', 'false'))
+
+# --- RUTA PARA LA LLAVE MAESTRA ---
+@app.route('/reset_maestro')
+def reset_maestro():
+    clave = request.args.get('clave')
+    if clave == CLAVE_MAESTRA:
+        # Redirige al index con la instrucción de limpiar el localStorage
+        return redirect(url_for('index', reset='true'))
+    return "ACCESO DENEGADO", 403
 
 @app.route('/votar/<ciudad>')
 def votar(ciudad):
