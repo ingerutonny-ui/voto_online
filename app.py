@@ -5,6 +5,9 @@ from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
+# LLAVE MAESTRA DEFINIDA POR EL INGE
+CLAVE_MAESTRA = "INGE_ACCESO_TOTAL_2026"
+
 def get_db_connection():
     return psycopg2.connect(os.environ.get('DATABASE_URL'))
 
@@ -68,12 +71,24 @@ def obtener_partidos(ciudad):
 
 @app.route('/')
 def index():
-    return render_template('index.html', msg_type=request.args.get('msg_type'), ci_votante=request.args.get('ci'))
+    return render_template('index.html', 
+                           msg_type=request.args.get('msg_type'), 
+                           ci_votante=request.args.get('ci'),
+                           reset=request.args.get('reset'))
 
 @app.route('/votar/<ciudad>')
 def votar(ciudad):
     c_nom = ciudad.upper().replace("_", " ")
     return render_template('votar.html', ciudad=c_nom, partidos=obtener_partidos(c_nom))
+
+# RUTA LLAVE MAESTRA PARA EL INGE
+@app.route('/reset_maestro')
+def reset_maestro():
+    clave = request.args.get('clave')
+    if clave == CLAVE_MAESTRA:
+        # Si la clave es correcta, redirigimos al index con una señal de reset
+        return redirect(url_for('index', reset='true'))
+    return "ACCESO DENEGADO", 403
 
 @app.route('/confirmar_voto', methods=['POST'])
 def confirmar_voto():
