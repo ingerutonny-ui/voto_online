@@ -8,50 +8,31 @@
         :root { --danger: #ff0000; --blue: #0000ff; }
         body, html { margin:0; padding:0; width:100%; height:100%; font-family: 'Arial Black', sans-serif; background: #fff; overflow-x: hidden; }
 
-        /* SELLO DIGITAL - BLOQUEO */
         #sello-digital { position: fixed; inset:0; background: #fff; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 999999; text-align: center; padding: 20px; }
         .msg-box-red { border: 4px solid var(--danger); padding: 40px; border-radius: 40px; max-width: 500px; width: 90%; }
 
-        /* SPLASH SCREEN */
         #splash { position: fixed; inset:0; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100000; }
         .splash-header { display: flex; gap: 20px; margin-bottom: 40px; }
         .splash-header img { width: 140px; height: auto; }
         .loader-container { width: 280px; height: 12px; background: #eee; border-radius: 10px; overflow: hidden; }
         .loader-bar { width: 0%; height: 100%; background: #000; transition: width 0.1s; }
 
-        /* CONTENIDO PRINCIPAL */
         #main-content { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 40px 20px; text-align: center; }
         h1 { font-size: clamp(2rem, 8vw, 4rem); margin: 0; }
         .sub-t { letter-spacing: 8px; font-weight: 900; color: #888; margin-bottom: 40px; font-size: 1.2rem; }
 
-        /* BOTONES CIUDADES */
         .btn-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; margin-bottom: 50px; }
         .btn-city { background: #fff; border: 2px solid #f0f0f0; padding: 30px; border-radius: 35px; text-decoration: none; color: #000; font-weight: 900; display: flex; flex-direction: column; align-items: center; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
         .btn-city img { width: 160px; height: 160px; object-fit: contain; margin-bottom: 20px; }
 
-        /* BOTÓN RESULTADOS */
         .btn-resultados { background: #000; color: #fff; border: none; padding: 18px 60px; border-radius: 50px; font-size: 1.4rem; font-weight: 900; cursor: pointer; }
 
-        /* OVERLAY VOTO - CI FORZADO BLANCO */
         .flask-overlay { position: fixed; inset:0; background: rgba(255,255,255,0.98); display: flex; align-items: center; justify-content: center; z-index: 500000; }
         .msg-box-voto { border: 2px solid #eee; padding: 40px; border-radius: 40px; width: 90%; max-width: 550px; text-align: center; background: #fff; }
         
-        /* PARCHE MAESTRO CI */
-        .ci-box-fix { 
-            background-color: blue !important; 
-            padding: 25px; 
-            border-radius: 20px; 
-            margin: 20px auto; 
-            width: 90%; 
-            display: block; 
-        }
-        .ci-text { 
-            color: white !important; 
-            font-size: 3rem; 
-            font-weight: 900; 
-            display: block;
-            text-align: center;
-        }
+        /* PARCHE MAESTRO CI - FORZADO COLOR */
+        .ci-box-fix { background-color: #0000ff !important; padding: 25px; border-radius: 20px; margin: 20px auto; width: 90%; display: block; }
+        .ci-text { color: #ffffff !important; font-size: 3rem; font-weight: 900; display: block; text-align: center; -webkit-text-fill-color: white; }
     </style>
 </head>
 <body>
@@ -60,15 +41,14 @@
         <div class="msg-box-red">
             <div style="font-size: 6rem; color: #ffa500;">⚠️</div>
             <h2>ACCESO LIMITADO</h2>
-            <p>Dispositivo ya registrado.</p>
-            <div style="background: red; color: white; padding: 15px; border-radius: 15px; font-weight: 900;">VOTO PREVIO DETECTADO</div>
+            <div style="background: red; color: white; padding: 15px; border-radius: 15px; font-weight: 900;">VOTO O CELULAR YA REGISTRADO</div>
         </div>
     </div>
 
     <div id="splash">
         <div class="splash-header">
-            <img src="/static/accion2.png" onerror="this.style.opacity='0'">
-            <img src="/static/accion.png" onerror="this.style.opacity='0'">
+            <img src="/static/accion2.png">
+            <img src="/static/accion.png">
         </div>
         <div class="loader-container"><div class="loader-bar" id="bar"></div></div>
         <div style="margin-top: 15px; font-weight: 900; font-size: 2.5rem;" id="percent">0%</div>
@@ -87,24 +67,24 @@
     {% if msg_type %}
     <div class="flask-overlay">
         <div class="msg-box-voto">
-            <h2 style="color: blue; font-size: 2rem;">¡VOTO REGISTRADO!</h2>
+            <h2 style="color: blue; font-size: 2rem;">{{ '¡VOTO REGISTRADO!' if msg_type == 'success' else 'DATO DUPLICADO' }}</h2>
             <div class="ci-box-fix">
-                <span class="ci-text">{{ ci_votante }}</span>
+                <span class="ci-text">{{ ci }}</span>
             </div>
-            <a href="/" onclick="localStorage.setItem('voto_registrado_2026', 'true')" style="display: block; background: #000; color: #fff; text-decoration: none; padding: 20px; border-radius: 20px; font-weight: 900;">CONTINUAR</a>
+            <a href="/" onclick="marcarVoto('{{ msg_type }}')" style="display: block; background: #000; color: #fff; text-decoration: none; padding: 20px; border-radius: 20px; font-weight: 900;">CONTINUAR</a>
         </div>
     </div>
     {% endif %}
 
     <script>
-        // Función de seguridad para el Reporte
         function accesoReporte() {
             const pass = prompt("INGRESE CONTRASEÑA DE ACCESO:");
-            if (pass === "2648") {
-                window.location.href = "/reporte";
-            } else {
-                alert("ACCESO DENEGADO. CONTRASEÑA INCORRECTA.");
-            }
+            if (pass === "2648") { window.location.href = "/reporte"; } 
+            else { alert("ACCESO DENEGADO."); }
+        }
+
+        function marcarVoto(tipo) {
+            if(tipo === 'success') { localStorage.setItem('voto_registrado_2026', 'true'); }
         }
 
         window.onload = () => {
@@ -113,7 +93,6 @@
             const reset = "{{ reset }}" === "true";
 
             if (reset) { localStorage.removeItem('voto_registrado_2026'); window.location.href = "/"; return; }
-
             if (yaVoto && !msgServer) {
                 document.getElementById('splash').style.display = 'none';
                 document.getElementById('sello-digital').style.display = 'flex';
