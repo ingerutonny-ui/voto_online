@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CONSULTA CIUDADANA</title>
     <style>
-        body, html { margin:0; padding:0; width:100%; height:100%; font-family: 'Arial Black', sans-serif; background: #fff; overflow: hidden; }
+        body, html { margin:0; padding:0; width:100%; height:100%; font-family: 'Arial Black', sans-serif; background: #fff; overflow-x: hidden; }
         
-        /* SELLO DIGITAL - PRIORIDAD MÁXIMA */
+        /* SELLO DIGITAL - BLOQUEO */
         #sello-digital { position: fixed; inset:0; background: #fff; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; text-align: center; padding: 20px; }
         .msg-box-red { border: 5px solid #ff0000; padding: 40px; border-radius: 40px; max-width: 500px; width: 90%; background: #fff; }
 
@@ -22,33 +22,34 @@
         .btn-city img { width: 150px; display: block; margin: 0 auto 10px; }
         .btn-res { background: #000; color: #fff; border: none; padding: 18px 60px; border-radius: 50px; font-weight: 900; cursor: pointer; margin-top: 20px; font-size: 1.2rem; }
 
-        /* CI BLANCO SOBRE AZUL - GARANTIZADO */
+        /* OVERLAY ÉXITO */
         .overlay { position: fixed; inset:0; background: rgba(255,255,255,0.98); display: flex; align-items: center; justify-content: center; z-index: 50000; }
-        .box { border: 2px solid #eee; padding: 40px; border-radius: 40px; width: 90%; max-width: 500px; text-align: center; background: #fff; }
+        .box { border: 2px solid #eee; padding: 40px; border-radius: 40px; width: 90%; max-width: 550px; text-align: center; background: #fff; }
+        
+        /* CI BLANCO SOBRE AZUL */
         .ci-container { background: #0000FF !important; padding: 25px; border-radius: 20px; margin: 20px 0; display: block; }
         .ci-num { color: #FFFFFF !important; font-size: 3.2rem; font-weight: 900; -webkit-text-fill-color: white !important; }
+
+        /* ESTILO PARA LA FRASE DE SEGURIDAD */
+        .frase-seguridad { 
+            color: #777; 
+            font-size: 0.85rem; 
+            font-weight: 900; 
+            margin-top: 25px; 
+            line-height: 1.4; 
+            padding: 0 10px;
+        }
     </style>
 
     <script>
-        // BLOQUEO INSTANTÁNEO: Se ejecuta antes de mostrar el HTML
         (function() {
             const yaVoto = localStorage.getItem('voto_registrado_2026') === 'true';
             const urlParams = new URLSearchParams(window.location.search);
             const tieneMsg = urlParams.has('msg_type');
-            const esReset = urlParams.get('reset') === 'true';
-
-            if (esReset) {
-                localStorage.removeItem('voto_registrado_2026');
-                window.location.href = "/";
-                return;
-            }
-
             if (yaVoto && !tieneMsg) {
-                // Forzamos el sello antes de que cargue la página
                 window.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('sello-digital').style.display = 'flex';
                     document.getElementById('splash').style.display = 'none';
-                    document.body.style.overflow = 'hidden';
                 });
             }
         })();
@@ -59,27 +60,27 @@
     <div id="sello-digital">
         <div class="msg-box-red">
             <div style="font-size: 6rem; color: #ffa500; margin-bottom: 10px;">⚠️</div>
-            <h2 style="font-size: 2.2rem; margin: 10px 0; color: #000;">ACCESO LIMITADO</h2>
-            <p style="font-weight: 900; font-size: 1.1rem; color: #666; margin-bottom: 25px;">Dispositivo ya registrado.</p>
-            <div style="background: #ff0000; color: white; padding: 20px; border-radius: 15px; font-weight: 900; font-size: 1.2rem;">VOTO PREVIO DETECTADO</div>
+            <h2 style="font-size: 2.2rem; margin: 10px 0;">ACCESO LIMITADO</h2>
+            <p style="font-weight: 900; color: #666; margin-bottom: 25px;">Dispositivo ya registrado.</p>
+            <div style="background: #ff0000; color: white; padding: 20px; border-radius: 15px; font-weight: 900;">VOTO PREVIO DETECTADO</div>
         </div>
     </div>
 
     <div id="splash">
         <div style="display:flex; gap:10px;">
-            <img src="/static/accion2.png" width="120" onerror="this.style.opacity='0'">
-            <img src="/static/accion.png" width="120" onerror="this.style.opacity='0'">
+            <img src="/static/accion2.png" width="120">
+            <img src="/static/accion.png" width="120">
         </div>
         <div class="loader-bar"><div id="bar"></div></div>
-        <h2 id="pct" style="font-size: 2rem;">0%</h2>
+        <h2 id="pct">0%</h2>
     </div>
 
     <div id="main-content">
         <h1>CONSULTA CIUDADANA</h1>
         <p style="letter-spacing: 5px; color: #888; font-weight: 900;">MUNICIPAL 2026</p>
         <div class="btn-city-container">
-            <a href="/votar/ORURO" class="btn-city"><img src="/static/oruro.png"><span>VOTAR EN: ORURO</span></a>
-            <a href="/votar/LA PAZ" class="btn-city"><img src="/static/lapaz.png"><span>VOTAR EN: LA PAZ</span></a>
+            <a href="/votar/ORURO" class="btn-city"><img src="/static/oruro.png">VOTAR EN: ORURO</a>
+            <a href="/votar/LA PAZ" class="btn-city"><img src="/static/lapaz.png">VOTAR EN: LA PAZ</a>
         </div>
         <button onclick="checkPass()" class="btn-res">RESULTADOS</button>
     </div>
@@ -89,7 +90,13 @@
         <div class="box">
             <h2 style="color:blue; font-size: 1.8rem;">{{ '¡VOTO REGISTRADO!' if msg_type == 'success' else 'DATO DUPLICADO' }}</h2>
             <div class="ci-container"><span class="ci-num">{{ ci }}</span></div>
+            
             <a href="/" onclick="marcarVoto('{{ msg_type }}')" style="display:block; background:#000; color:#fff; padding:20px; border-radius:20px; text-decoration:none; font-weight: 900;">CONTINUAR</a>
+            
+            <div class="frase-seguridad">
+                POR SEGURIDAD, ESTE ACCESO QUEDA DESHABILITADO PARA NUEVOS VOTOS. <br>
+                GRACIAS POR PARTICIPAR DEL SISTEMA DE CONSULTA CIUDADANA MUNICIPAL.
+            </div>
         </div>
     </div>
     {% endif %}
@@ -107,7 +114,6 @@
         window.onload = () => {
             const yaVoto = localStorage.getItem('voto_registrado_2026') === 'true';
             const tieneMsg = "{{ msg_type }}" !== "";
-
             if (!yaVoto || tieneMsg) {
                 let p = 0;
                 let iv = setInterval(() => {
@@ -118,7 +124,6 @@
                         clearInterval(iv); 
                         document.getElementById('splash').style.display='none'; 
                         document.getElementById('main-content').style.display='flex'; 
-                        document.body.style.overflow = 'auto';
                     }
                 }, 30);
             }
