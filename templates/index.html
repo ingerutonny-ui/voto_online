@@ -7,25 +7,25 @@
     <style>
         body, html { margin:0; padding:0; width:100%; height:100%; font-family: 'Arial Black', sans-serif; background: #fff; }
         
-        /* SELLO DIGITAL - ESTILO RECUADRO ROJO */
-        #sello-digital { position: fixed; inset:0; background: #fff; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 999999; text-align: center; padding: 20px; }
+        /* SELLO DIGITAL - BLOQUEO TOTAL */
+        #sello-digital { position: fixed; inset:0; background: #fff; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; text-align: center; padding: 20px; }
         .msg-box-red { border: 4px solid #ff0000; padding: 40px; border-radius: 40px; max-width: 500px; width: 90%; }
 
-        #splash { position: fixed; inset:0; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
-        .splash-header img { width: 140px; margin: 10px; }
-        .loader-bar { width: 280px; height: 12px; background: #eee; border-radius: 10px; overflow: hidden; }
+        /* SPLASH Y CARGA */
+        #splash { position: fixed; inset:0; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; }
+        .loader-bar { width: 280px; height: 12px; background: #eee; border-radius: 10px; overflow: hidden; margin: 20px 0; }
         #bar { width: 0%; height: 100%; background: #000; }
 
-        #main-content { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center; }
+        /* CONTENIDO PRINCIPAL */
+        #main-content { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center; padding: 20px; }
         .btn-city { border: 2px solid #f0f0f0; padding: 25px; border-radius: 30px; text-decoration: none; color: #000; display: inline-block; margin: 15px; width: 280px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         .btn-city img { width: 150px; display: block; margin: 0 auto 10px; }
-        .btn-res { background: #000; color: #fff; border: none; padding: 15px 50px; border-radius: 50px; font-weight: 900; cursor: pointer; margin-top: 20px; font-size: 1.1rem; }
+        .btn-res { background: #000; color: #fff; border: none; padding: 18px 60px; border-radius: 50px; font-weight: 900; cursor: pointer; margin-top: 20px; font-size: 1.2rem; }
 
-        .overlay { position: fixed; inset:0; background: rgba(255,255,255,0.98); display: flex; align-items: center; justify-content: center; z-index: 500; }
+        /* CI BLANCO SOBRE AZUL */
+        .overlay { position: fixed; inset:0; background: rgba(255,255,255,0.98); display: flex; align-items: center; justify-content: center; z-index: 2000; }
         .box { border: 2px solid #eee; padding: 40px; border-radius: 40px; width: 90%; max-width: 500px; text-align: center; background: #fff; }
-        
-        /* CI BLANCO SOBRE AZUL - GARANTIZADO */
-        .ci-container { background: #0000FF !important; padding: 25px; border-radius: 20px; margin: 20px 0; display: block; }
+        .ci-container { background: #0000FF !important; padding: 25px; border-radius: 20px; margin: 20px 0; }
         .ci-num { color: #FFFFFF !important; font-size: 3.2rem; font-weight: 900; -webkit-text-fill-color: white !important; }
     </style>
 </head>
@@ -33,28 +33,28 @@
 
     <div id="sello-digital">
         <div class="msg-box-red">
-            <div style="font-size: 6rem; color: #ffa500; margin-bottom: 10px;">⚠️</div>
-            <h2 style="font-size: 2rem; margin-bottom: 10px;">ACCESO LIMITADO</h2>
-            <p style="font-weight: bold; margin-bottom: 25px;">Dispositivo ya registrado.</p>
-            <div style="background: #ff0000; color: white; padding: 15px; border-radius: 15px; font-weight: 900;">VOTO PREVIO DETECTADO</div>
+            <div style="font-size: 6rem; color: #ffa500;">⚠️</div>
+            <h2 style="font-size: 2rem;">ACCESO LIMITADO</h2>
+            <p style="font-weight: bold;">Dispositivo ya registrado.</p>
+            <div style="background: #ff0000; color: white; padding: 15px; border-radius: 15px; font-weight: 900;">VOTO O CELULAR DUPLICADO</div>
         </div>
     </div>
 
     <div id="splash">
-        <div class="splash-header">
-            <img src="/static/accion2.png" onerror="this.style.opacity='0'">
-            <img src="/static/accion.png" onerror="this.style.opacity='0'">
+        <div style="display:flex; gap:10px;">
+            <img src="/static/accion2.png" width="120">
+            <img src="/static/accion.png" width="120">
         </div>
         <div class="loader-bar"><div id="bar"></div></div>
-        <h2 id="pct" style="margin-top: 15px; font-size: 2rem;">0%</h2>
+        <h2 id="pct">0%</h2>
     </div>
 
     <div id="main-content">
         <h1>CONSULTA CIUDADANA</h1>
         <p style="letter-spacing: 5px; color: #888; font-weight: 900;">MUNICIPAL 2026</p>
         <div class="btn-city-container">
-            <a href="/votar/ORURO" class="btn-city"><img src="/static/oruro.png"><span>VOTAR EN: ORURO</span></a>
-            <a href="/votar/LA PAZ" class="btn-city"><img src="/static/lapaz.png"><span>VOTAR EN: LA PAZ</span></a>
+            <a href="/votar/ORURO" class="btn-city"><img src="/static/oruro.png">VOTAR EN: ORURO</a>
+            <a href="/votar/LA PAZ" class="btn-city"><img src="/static/lapaz.png">VOTAR EN: LA PAZ</a>
         </div>
         <button onclick="checkPass()" class="btn-res">RESULTADOS</button>
     </div>
@@ -62,23 +62,21 @@
     {% if msg_type %}
     <div class="overlay">
         <div class="box">
-            <h2 style="color:blue; font-size: 1.8rem;">{{ '¡VOTO REGISTRADO!' if msg_type == 'success' else 'DATO DUPLICADO' }}</h2>
+            <h2 style="color:blue">{{ '¡VOTO REGISTRADO!' if msg_type == 'success' else 'DATO DUPLICADO' }}</h2>
             <div class="ci-container">
                 <span class="ci-num">{{ ci }}</span>
             </div>
-            <a href="/" onclick="marcarVoto('{{ msg_type }}')" style="display:block; background:#000; color:#fff; padding:20px; border-radius:20px; text-decoration:none; font-weight: 900;">CONTINUAR</a>
+            <a href="/" onclick="marcarVoto('{{ msg_type }}')" style="display:block; background:#000; color:#fff; padding:20px; border-radius:15px; text-decoration:none; font-weight: 900;">CONTINUAR</a>
         </div>
     </div>
     {% endif %}
 
     <script>
-        // Seguridad para Reporte
         function checkPass() { 
-            if(prompt("INGRESE CLAVE DE ACCESO:") === "2648") window.location.href="/reporte"; 
-            else alert("ACCESO DENEGADO."); 
+            if(prompt("CLAVE DE ACCESO:") === "2648") window.location.href="/reporte"; 
+            else alert("ERROR: CLAVE INCORRECTA"); 
         }
 
-        // Marcar el dispositivo solo si fue éxito
         function marcarVoto(tipo) {
             if(tipo === 'success') localStorage.setItem('voto_registrado_2026', 'true');
         }
@@ -88,21 +86,18 @@
             const msgServer = "{{ msg_type }}";
             const modoReset = "{{ reset }}" === "true";
 
-            // Manejo del Reset Maestro
             if (modoReset) { 
                 localStorage.removeItem('voto_registrado_2026'); 
                 window.location.href = "/"; 
                 return; 
             }
 
-            // Mostrar SELLO DIGITAL si ya votó
             if (yaVoto && !msgServer) {
                 document.getElementById('splash').style.display = 'none';
                 document.getElementById('sello-digital').style.display = 'flex';
                 return;
             }
 
-            // Animación del Splash
             let p = 0;
             let iv = setInterval(() => {
                 p += 5;
