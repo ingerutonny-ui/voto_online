@@ -77,11 +77,11 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const yaVoto = localStorage.getItem('voto_registrado_2026') === 'true';
+        const yaVoto = localStorage.getItem('voto_2026') === 'true';
         const tieneMsg = urlParams.has('msg_type');
 
         if (urlParams.get('reset') === 'true') {
-            localStorage.removeItem('voto_registrado_2026');
+            localStorage.removeItem('voto_2026');
             window.location.href = "/";
         } 
         else if (yaVoto && !tieneMsg) {
@@ -109,7 +109,7 @@
         }
 
         function marcarVoto(tipo) {
-            if(tipo === 'success') localStorage.setItem('voto_registrado_2026', 'true');
+            if(tipo === 'success') localStorage.setItem('voto_2026', 'true');
         }
     </script>
 </body>
